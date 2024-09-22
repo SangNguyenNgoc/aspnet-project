@@ -1,0 +1,6 @@
+﻿services:
+  aspdotnet-project:
+    image: aspdotnet-project
+    build:
+      context: .
+      dockerfile: aspdotnet-project/Dockerfile
