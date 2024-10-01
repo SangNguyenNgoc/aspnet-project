@@ -30,4 +30,7 @@ public class Seat
 
     [InverseProperty("Seat")] 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+
+    [InverseProperty("Seats")]
+    public required SeatType Type { get; set; }
 }
