@@ -27,6 +27,7 @@ public class MyDbContext : IdentityDbContext<User>
     public DbSet<Hall> Halls { get; set; }
     public DbSet<HallStatus> HallStatus { get; set; }
     public DbSet<Seat> Seats { get; set; }
+    public DbSet<SeatType> SeatTypes { get; set; }
 
     public DbSet<Format> Formats { get; set; }
     public DbSet<Genre> Genres { get; set; }
@@ -79,6 +80,11 @@ public class MyDbContext : IdentityDbContext<User>
             .HasOne(s => s.Hall)
             .WithMany(h => h.Seats)
             .HasForeignKey("hall_id");
+
+        modelBuilder.Entity<Seat>()
+            .HasOne(s => s.Type)
+            .WithMany(st => st.Seats)
+            .HasForeignKey("type_id");
         
         //Create relationship in Movie
 
