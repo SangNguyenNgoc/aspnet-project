@@ -35,4 +35,7 @@ public class Cinema
 
     [InverseProperty("Cinema")]
     public virtual ICollection<Hall> Halls { get; set; } = new List<Hall>();
+    
+    [InverseProperty("Cinemas")]
+    public Location Location { get; set; }
 }

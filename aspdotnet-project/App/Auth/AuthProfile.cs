@@ -1,4 +1,4 @@
-﻿using course_register.API.Dtos;
+﻿using aspdotnet_project.App.Auth.Dtos;
 
 namespace aspdotnet_project.App.Auth;
 

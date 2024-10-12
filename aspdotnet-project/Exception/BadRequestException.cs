@@ -1,4 +1,4 @@
-﻿namespace course_register.API.Exception;
+﻿namespace aspdotnet_project.Exception;
 
 public class BadRequestException : AppException
 {

@@ -1,5 +1,4 @@
 ﻿using aspdotnet_project.App.Auth.Dtos;
-using course_register.API.Dtos;
 
 namespace aspdotnet_project.App.Auth.Services;
 

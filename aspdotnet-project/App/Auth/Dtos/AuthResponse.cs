@@ -1,4 +1,4 @@
-﻿namespace course_register.API.Dtos;
+﻿namespace aspdotnet_project.App.Auth.Dtos;
 
 public class AuthResponse
 {

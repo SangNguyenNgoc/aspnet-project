@@ -21,6 +21,7 @@ public class MyDbContext : IdentityDbContext<User>
     public DbSet<Bill> Bills { get; set; }
     public DbSet<BillStatus> BillStatus { get; set; }
     
+    public DbSet<Location> Locations { get; set; }
     public DbSet<Cinema> Cinemas { get; set; }
     public DbSet<CinemaStatus> CinemaStatus { get; set; }
     public DbSet<Hall> Halls { get; set; }
@@ -31,7 +32,7 @@ public class MyDbContext : IdentityDbContext<User>
     public DbSet<Genre> Genres { get; set; }
     public DbSet<MovieStatus> MovieStatus { get; set; }
     public DbSet<Image> Images { get; set; }
-    public DbSet<Movie> Movies { get; set; }
+    public DbSet<Movie?> Movies { get; set; }
 
     public DbSet<Show> Shows { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
@@ -53,6 +54,11 @@ public class MyDbContext : IdentityDbContext<User>
             .HasForeignKey("user_id");
         
         //Create relationship in Cinema
+        
+        modelBuilder.Entity<Cinema>()
+            .HasOne(c => c.Location)
+            .WithMany(l => l.Cinemas)
+            .HasForeignKey("location_id");
 
         modelBuilder.Entity<Cinema>()
             .HasOne(c => c.Status)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using aspdotnet_project.Context;
 
@@ -11,9 +12,11 @@ using aspdotnet_project.Context;
 namespace aspdotnet_project.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241010040518_initAddLocation")]
+    partial class initAddLocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,13 +83,13 @@ namespace aspdotnet_project.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ec7e466c-2273-4761-b47b-7c0cb84e477e",
+                            Id = "f1503442-f971-4559-8ef4-f323fcec6b4f",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "1cd6f5b6-7933-4675-99fb-ca5e427a6c5f",
+                            Id = "572c3f6e-22e0-471f-a3f8-ad4acdff7125",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -299,10 +302,15 @@ namespace aspdotnet_project.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
+                    b.Property<long>("location_id")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("status_id")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("location_id");
 
                     b.HasIndex("status_id");
 
@@ -386,7 +394,26 @@ namespace aspdotnet_project.Migrations
 
                     b.ToTable("hall_status");
                 });
-            
+
+            modelBuilder.Entity("aspdotnet_project.App.Cinema.Entities.Location", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("locations");
+                });
 
             modelBuilder.Entity("aspdotnet_project.App.Cinema.Entities.Seat", b =>
                 {
@@ -894,12 +921,19 @@ namespace aspdotnet_project.Migrations
 
             modelBuilder.Entity("aspdotnet_project.App.Cinema.Entities.Cinema", b =>
                 {
+                    b.HasOne("aspdotnet_project.App.Cinema.Entities.Location", "Location")
+                        .WithMany("Cinemas")
+                        .HasForeignKey("location_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("aspdotnet_project.App.Cinema.Entities.CinemaStatus", "Status")
                         .WithMany("Cinemas")
                         .HasForeignKey("status_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Location");
 
                     b.Navigation("Status");
                 });
@@ -1031,7 +1065,11 @@ namespace aspdotnet_project.Migrations
                 {
                     b.Navigation("Halls");
                 });
-            
+
+            modelBuilder.Entity("aspdotnet_project.App.Cinema.Entities.Location", b =>
+                {
+                    b.Navigation("Cinemas");
+                });
 
             modelBuilder.Entity("aspdotnet_project.App.Cinema.Entities.Seat", b =>
                 {

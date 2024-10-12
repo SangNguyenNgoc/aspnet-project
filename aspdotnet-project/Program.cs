@@ -1,7 +1,14 @@
 using aspdotnet_project.App.Auth.Services;
+using aspdotnet_project.App.Cinema.Repositories;
+using aspdotnet_project.App.Cinema.Services;
+using aspdotnet_project.App.Movie;
+using aspdotnet_project.App.Movie.Repositories;
+using aspdotnet_project.App.Movie.Services;
+using aspdotnet_project.App.Show.Repositories;
+using aspdotnet_project.App.Show.Services;
 using aspdotnet_project.App.User.Entities;
 using aspdotnet_project.Context;
-using course_register.API.Filter;
+using aspdotnet_project.Filter;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +32,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(MovieProfile));
 
 builder.Services.AddDbContext<MyDbContext>(options =>
 {
@@ -75,6 +83,21 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+// Cinema
+builder.Services.AddScoped<IHallRepository, HallRepository>();
+builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<ICinemaService, CinemaService>();
+// Movie
+builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+builder.Services.AddScoped<IFormatRepository, FormatRepository>();
+builder.Services.AddScoped<IMovieStatusRepository, MovieStatusRepository>();
+builder.Services.AddScoped<IMovieService, MovieService>();
+// Showtime
+builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
+builder.Services.AddScoped<IShowtimeService, ShowtimeService>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+
 
 var app = builder.Build();
 
@@ -88,6 +111,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
+app.UseRouting();
 app.MapControllers();
-
 app.Run();

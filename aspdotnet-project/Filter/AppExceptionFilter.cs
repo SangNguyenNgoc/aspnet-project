@@ -1,8 +1,8 @@
-﻿using course_register.API.Exception;
+﻿using aspdotnet_project.Exception;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace course_register.API.Filter;
+namespace aspdotnet_project.Filter;
 
 public class AppExceptionFilter : IExceptionFilter
 {
