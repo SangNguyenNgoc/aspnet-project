@@ -4,5 +4,5 @@ namespace aspdotnet_project.App.Cinema.Repositories;
 
 public interface ILocationRepository
 {
-    Task<List<Location>> getAllLocationAndCinema();
+    Task<List<Location>> GetAllLocationAndCinema();
 }

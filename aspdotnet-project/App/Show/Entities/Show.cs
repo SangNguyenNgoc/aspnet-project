@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using aspdotnet_project.App.Cinema.Entities;
 using aspdotnet_project.App.Movie.Entities;
+// ReSharper disable All
 
 namespace aspdotnet_project.App.Show.Entities;
 
@@ -11,6 +12,7 @@ public class Show
     [Key]
     [Column(name: "id")]
     [StringLength(50)]
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public string Id { get; set; } = Guid.NewGuid().ToString();
     
     [Column(name:"running_time", TypeName = "int(11)")]

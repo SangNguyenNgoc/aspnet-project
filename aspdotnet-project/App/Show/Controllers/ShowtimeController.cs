@@ -1,6 +1,5 @@
 ﻿using aspdotnet_project.App.Show.Dtos;
 using aspdotnet_project.App.Show.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace aspdotnet_project.App.Show.Controllers;
@@ -19,7 +18,7 @@ public class ShowtimeController: ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateShowtimeRequest createShowtimeRequest)
     {
-        var result = await _showtimeService.Create(createShowtimeRequest);
+        await _showtimeService.Create(createShowtimeRequest);
         return Ok("success");
     }
     

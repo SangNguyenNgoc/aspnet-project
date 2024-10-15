@@ -1,5 +1,4 @@
 ﻿using aspdotnet_project.App.Movie.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace aspdotnet_project.App.Movie.Controllers;
@@ -34,7 +33,7 @@ public class MovieController : ControllerBase
     }
     
     [HttpGet("/showing-now")]
-    public async Task<IActionResult> GetMovieshowingNow([FromQuery] int page, [FromQuery] int perPage)
+    public async Task<IActionResult> GetMoviesShowingNow([FromQuery] int page, [FromQuery] int perPage)
     {
         return Ok(await _movieService.GetMovieByStatus("showing-now", page, perPage));
     }

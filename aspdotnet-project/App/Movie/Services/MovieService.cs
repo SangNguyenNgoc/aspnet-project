@@ -34,15 +34,13 @@ public class MovieService : IMovieService
                 var statusAndMovie = _mapper.Map<StatusInfo>(movieStatus);
                 var movieInfoLandings = statusAndMovie.Movies;
 
-                if (movieInfoLandings.Any())
-                {
-                    var moviesAfterSort = movieInfoLandings
-                        .OrderBy(m => m.ReleaseDate)
-                        .Take(5)
-                        .ToList();
+                if (movieInfoLandings.Count == 0) return statusAndMovie;
+                var moviesAfterSort = movieInfoLandings
+                    .OrderBy(m => m.ReleaseDate)
+                    .Take(5)
+                    .ToList();
 
-                    statusAndMovie.Movies = moviesAfterSort;
-                }
+                statusAndMovie.Movies = moviesAfterSort;
 
                 return statusAndMovie;
             })
@@ -54,7 +52,7 @@ public class MovieService : IMovieService
         var movie = await _movieRepository.GetMovieBySlug(slug);
         if (movie != null)
         {
-            return await AddShowtoMovie(movie);
+            return await AddShowToMovie(movie);
         }
         throw new DataNotFoundException($"Movie {slug} not found");
     }
@@ -70,7 +68,7 @@ public class MovieService : IMovieService
             .ToList();
     }
 
-    private async Task<MovieDetail> AddShowtoMovie(Entities.Movie movie)
+    private async Task<MovieDetail> AddShowToMovie(Entities.Movie movie)
     {
         var movieDetail = _mapper.Map<MovieDetail>(movie);
         var toDate = DateOnly.FromDateTime(DateTime.Today);

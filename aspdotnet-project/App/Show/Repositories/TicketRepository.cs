@@ -13,7 +13,7 @@ public class TicketRepository : ITicketRepository
         _context = context;
     }
     
-    public async Task<List<Ticket>> getTicketsByShowId(string showId)
+    public async Task<List<Ticket>> GetTicketsByShowId(string showId)
     {
         return await _context.Tickets
             .Include(t => t.Show)

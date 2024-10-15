@@ -25,12 +25,11 @@ public class CinemaService : ICinemaService
     public async Task<List<LocationAndCinema>> GetAllCinemas()
     {
         var result = new List<LocationAndCinema>();
-        var locations = await _locationRepository.getAllLocationAndCinema();
+        var locations = await _locationRepository.GetAllLocationAndCinema();
         var movies = await _movieRepository.GetMovieAndShowByCinemaId();
 
-        foreach (var l in locations)
+        foreach (var location in locations.Select(l => _mapper.Map<LocationAndCinema>(l)))
         {
-            var location = _mapper.Map<LocationAndCinema>(l);
             foreach (var c in location.Cinemas)
             {
                 c.Movies = GetMovieAndFormat(c.Id, movies);

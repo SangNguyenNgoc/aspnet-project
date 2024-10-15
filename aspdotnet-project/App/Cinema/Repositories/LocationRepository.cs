@@ -13,7 +13,7 @@ public class LocationRepository : ILocationRepository
         _context = context;
     }
 
-    public async Task<List<Location>> getAllLocationAndCinema()
+    public async Task<List<Location>> GetAllLocationAndCinema()
     {
         return await _context.Locations
             .Include(l => l.Cinemas)

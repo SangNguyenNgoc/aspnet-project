@@ -20,15 +20,11 @@ public class HallRepository : IHallRepository
             .ToListAsync();
 
         // Kiểm tra xem có bất kỳ hội trường nào có show hay không
-        bool hasShows = halls.Any(h => h.Shows.Any(s=> s.StartDate == date));
+        var hasShows = halls.Any(h => h.Shows.Any(s=> s.StartDate == date));
 
         // Nếu có hội trường nào có show thì trả về null
-        if (hasShows)
-        {
-            return null!;
-        }
-
-        // Nếu không có hội trường nào có show thì trả về danh sách hội trường
-        return halls;
+        return hasShows ? null! :
+            // Nếu không có hội trường nào có show thì trả về danh sách hội trường
+            halls;
     }
 }
