@@ -1,9 +1,11 @@
 using aspdotnet_project.App.Auth.Services;
 using aspdotnet_project.App.User.Entities;
+using aspdotnet_project.App.User.Service;
 using aspdotnet_project.Context;
 using course_register.API.Filter;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -75,6 +77,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
