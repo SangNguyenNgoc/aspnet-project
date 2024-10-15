@@ -20,7 +20,7 @@ public class ShowtimeService : IShowtimeService
     
     private readonly string _firstShowtime = Environment.GetEnvironmentVariable("FIRST_SHOWTIME")!;
     private readonly string _lastShowtime = Environment.GetEnvironmentVariable("LAST_SHOWTIME")!;
-    private readonly int _showtimeInterval = int.Parse(Environment.GetEnvironmentVariable("SHOWTIME_INTERVAL")!);
+    private readonly int _showtimeInterval = int.Parse(Environment.GetEnvironmentVariable("SHOW_INTERVAL")!);
     private readonly int _cleaningTime = int.Parse(Environment.GetEnvironmentVariable("CLEANING_TIME")!);
 
     // ReSharper disable once ConvertToPrimaryConstructor
