@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using aspdotnet_project.Context;
 
@@ -11,9 +12,11 @@ using aspdotnet_project.Context;
 namespace aspdotnet_project.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241015094751_AddUser")]
+    partial class AddUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,13 +83,13 @@ namespace aspdotnet_project.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "29955e0e-543e-4580-bb60-7adf929a3d6f",
+                            Id = "0a43c618-1209-4717-a410-c0b1f8ebb381",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "b062a191-5309-4377-af8f-5cb13949a19e",
+                            Id = "5902ff8c-7929-4cac-86be-dd0604be3904",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -745,10 +748,6 @@ namespace aspdotnet_project.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("avatar");
 
-                    b.Property<string>("ChangeToken")
-                        .HasColumnType("longtext")
-                        .HasColumnName("change_token");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
@@ -765,6 +764,10 @@ namespace aspdotnet_project.Migrations
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
+
+                    b.Property<string>("EmailChangeToken")
+                        .HasColumnType("longtext")
+                        .HasColumnName("email_change_token");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
@@ -809,10 +812,6 @@ namespace aspdotnet_project.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");

@@ -19,4 +19,14 @@ public class GenderUtil
             _ => "Không xác định"
         };
     }
+
+    public static Gender GetGenderNum(string genderDescription){
+        return genderDescription switch
+        {
+            "Nam" => Gender.Male,
+            "Nữ" => Gender.Female,
+            "Khác" => Gender.Unknown,
+            _ => throw new ArgumentException("Invalid gender description"),
+        };
+    }
 }

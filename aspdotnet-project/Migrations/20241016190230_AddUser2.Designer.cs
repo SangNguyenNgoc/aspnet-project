@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using aspdotnet_project.Context;
 
@@ -11,9 +12,11 @@ using aspdotnet_project.Context;
 namespace aspdotnet_project.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016190230_AddUser2")]
+    partial class AddUser2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,13 +83,13 @@ namespace aspdotnet_project.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "29955e0e-543e-4580-bb60-7adf929a3d6f",
+                            Id = "608c5766-4b49-49eb-a4ea-c2bd878fb13d",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "b062a191-5309-4377-af8f-5cb13949a19e",
+                            Id = "03068870-e671-49c6-977c-6666236656d5",
                             Name = "User",
                             NormalizedName = "USER"
                         });

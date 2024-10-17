@@ -12,6 +12,6 @@ public class UserInfo{
     public DateOnly? DateOfBirth { get; set; }
     public string? FullName { get; set; }
 
-    public Gender Gender { get; set; }
+    public string? Gender { get; set; }
 
 }

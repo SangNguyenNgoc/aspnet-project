@@ -24,7 +24,17 @@ public class User : IdentityUser
 
     [Column(name:"gender", TypeName = "enum('Female','Male','Unknown')")]
     public Gender Gender { get; set; }
-    
+
+    [Column(name:"change_token")]
+    public string? ChangeToken { get; set; }
+
+    [Column(name:"new_email")]
+    public string? NewEmail { get; set; }
+
+    // 0: inactive, 1: active, 2: locked
+    [Column(name:"status")]
+    public int Status { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<Bill.entities.Bill> Bills { get; set; } = new List<Bill.entities.Bill>();
     

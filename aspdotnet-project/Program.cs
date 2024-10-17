@@ -1,5 +1,6 @@
 using aspdotnet_project.App.Auth.Services;
 using aspdotnet_project.App.User.Entities;
+using aspdotnet_project.App.User.Repository;
 using aspdotnet_project.App.User.Service;
 using aspdotnet_project.Context;
 using course_register.API.Filter;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 Env.Load();
@@ -49,8 +51,24 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
         options.Password.RequiredLength = 8;
 
         options.User.RequireUniqueEmail = true;
+        options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
+        options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+        options.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultProvider;
+
     })
-    .AddEntityFrameworkStores<MyDbContext>();
+    .AddEntityFrameworkStores<MyDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// Read environment variables
+var emailHost = Environment.GetEnvironmentVariable("STMP_SERVER");
+var emailPort = int.Parse(Environment.GetEnvironmentVariable("STMP_PORT"));
+var emailUsername = Environment.GetEnvironmentVariable("STMP_USERNAME");
+var emailPassword = Environment.GetEnvironmentVariable("STMP_PASSWORD");
+builder.Services.AddSingleton(new EmailService(emailHost, emailPort, emailUsername, emailPassword));
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -77,7 +95,9 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<UserService>();
+
+
+
 
 var app = builder.Build();
 
