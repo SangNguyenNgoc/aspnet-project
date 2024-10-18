@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace aspdotnet_project.App.Cinema.Controllers;
 
-[Route("/api/v1/cinemas")]
 [ApiController]
+[Route("/api/v1/cinemas")]
 public class CinemaController : ControllerBase
 {
     private readonly ICinemaService _cinemaService;
