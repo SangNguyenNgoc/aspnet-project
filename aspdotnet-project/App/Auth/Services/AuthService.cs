@@ -38,7 +38,8 @@ public class AuthService : IAuthService
             UserName = request.Email,
             CreateDate = DateTime.Now,
             Avatar = _config["Url:DefaultAvatar"] ?? "",
-            Gender = Gender.Unknown
+            Gender = Gender.Unknown,
+            Status = 1
         };
         var createdUser = await _userManager.CreateAsync(newUser, request.Password!);
 
@@ -59,9 +60,15 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> Login(LoginRequest request)
     {
         var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email);
+        //check status
         if (user == null)
         {
             throw new BadRequestException("Invalid email or password");
+        }
+        // Check if the user is locked out
+        if (user.Status != 1)
+        {
+            throw new BadRequestException("User is locked");
         }
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password!, false);
         if (!result.Succeeded)

@@ -7,12 +7,16 @@ using aspdotnet_project.App.Movie.Services;
 using aspdotnet_project.App.Show.Repositories;
 using aspdotnet_project.App.Show.Services;
 using aspdotnet_project.App.User.Entities;
+using aspdotnet_project.App.User.Repository;
+using aspdotnet_project.App.User.Service;
 using aspdotnet_project.Context;
 using aspdotnet_project.Filter;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 Env.Load();
@@ -55,8 +59,24 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
         options.Password.RequiredLength = 8;
 
         options.User.RequireUniqueEmail = true;
+        options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
+        options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+        options.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultProvider;
+
     })
-    .AddEntityFrameworkStores<MyDbContext>();
+    .AddEntityFrameworkStores<MyDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// Read environment variables
+var emailHost = Environment.GetEnvironmentVariable("STMP_SERVER");
+var emailPort = int.Parse(Environment.GetEnvironmentVariable("STMP_PORT"));
+var emailUsername = Environment.GetEnvironmentVariable("STMP_USERNAME");
+var emailPassword = Environment.GetEnvironmentVariable("STMP_PASSWORD");
+builder.Services.AddSingleton(new EmailService(emailHost, emailPort, emailUsername, emailPassword));
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -97,6 +117,9 @@ builder.Services.AddScoped<IMovieService, MovieService>();
 builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
 builder.Services.AddScoped<IShowtimeService, ShowtimeService>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+
+
+
 
 
 var app = builder.Build();

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using aspdotnet_project.Context;
 
@@ -11,9 +12,11 @@ using aspdotnet_project.Context;
 namespace aspdotnet_project.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016194658_AddUser3")]
+    partial class AddUser3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,13 +83,13 @@ namespace aspdotnet_project.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3c7020d0-aed5-49f2-ac8b-04e9629b127e",
+                            Id = "3cc08336-04b3-42f1-ae53-27415769363c",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "bf044299-d79a-42e2-a44f-a9b1c3910f71",
+                            Id = "caf24d3d-babb-462d-bd88-0a08d0d480a3",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -386,7 +389,6 @@ namespace aspdotnet_project.Migrations
 
                     b.ToTable("hall_status");
                 });
-            
 
             modelBuilder.Entity("aspdotnet_project.App.Cinema.Entities.Seat", b =>
                 {
@@ -811,10 +813,6 @@ namespace aspdotnet_project.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -1078,7 +1076,6 @@ namespace aspdotnet_project.Migrations
                 {
                     b.Navigation("Halls");
                 });
-            
 
             modelBuilder.Entity("aspdotnet_project.App.Cinema.Entities.Seat", b =>
                 {
