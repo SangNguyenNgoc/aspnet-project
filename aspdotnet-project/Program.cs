@@ -1,4 +1,6 @@
 using aspdotnet_project.App.Auth.Services;
+using aspdotnet_project.App.Bill.Repositories;
+using aspdotnet_project.App.Bill.Services;
 using aspdotnet_project.App.Cinema.Repositories;
 using aspdotnet_project.App.Cinema.Services;
 using aspdotnet_project.App.Movie;
@@ -7,6 +9,7 @@ using aspdotnet_project.App.Movie.Services;
 using aspdotnet_project.App.Show.Repositories;
 using aspdotnet_project.App.Show.Services;
 using aspdotnet_project.App.User.Entities;
+using aspdotnet_project.Configurations;
 using aspdotnet_project.Context;
 using aspdotnet_project.Filter;
 using DotNetEnv;
@@ -18,6 +21,7 @@ using Microsoft.IdentityModel.Tokens;
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers(options =>
@@ -44,6 +48,15 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     var connectionString = $"Server={server};Database={database};User Id={userId};Password={password};";
     var mySqlVersion = new MySqlServerVersion(new Version(8, 0, 30));
     options.UseMySql(connectionString, mySqlVersion);
+});
+
+builder.Services.Configure<VnPayConfig>(options =>
+{
+    options.VnpayKey = Environment.GetEnvironmentVariable("VNPAY_KEY")!;
+    options.VnpayUrl = Environment.GetEnvironmentVariable("VNPAY_URL")!;
+    options.TmnCode = Environment.GetEnvironmentVariable("TMN_CODE")!;
+    options.VnpayReturnUrl = Environment.GetEnvironmentVariable("VNPAY_RETURN_URL")!;
+    options.TimeOut = int.Parse(Environment.GetEnvironmentVariable("TIMEOUT")!);
 });
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -84,6 +97,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Cinema
+builder.Services.AddScoped<ISeatRepository, SeatRepository>();
 builder.Services.AddScoped<IHallRepository, HallRepository>();
 builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
@@ -97,7 +111,15 @@ builder.Services.AddScoped<IMovieService, MovieService>();
 builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
 builder.Services.AddScoped<IShowtimeService, ShowtimeService>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+//Bill
+builder.Services.AddScoped<IBillStatusRepository, BillStatusRepository>();
+builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddScoped<IBillService, BillService>();
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(8080);
+});
 
 var app = builder.Build();
 

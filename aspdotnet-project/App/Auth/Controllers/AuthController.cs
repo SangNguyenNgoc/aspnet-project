@@ -16,42 +16,42 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    [HttpPost("/register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var result = await _authService.Register(request);
         return Ok(result);
     }
     
-    [HttpPost("/login")]
+    [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var result = await _authService.Login(request);
         return Ok(result);
     }
 
-    [HttpGet("/admin")]
+    [HttpGet("admin")]
     [Authorize(Roles = "Admin")]
     public string ForAdmin()
     {
         return "Admin";
     }
     
-    [HttpGet("/user")]
+    [HttpGet("user")]
     [Authorize(Roles = "User")]
     public string ForUser()
     {
         return "User";
     }
     
-    [HttpGet("/any")]
+    [HttpGet("any")]
     [Authorize]
     public string ForAnyAuthenticate()
     {
         return "Any request which authenticated";
     }
     
-    [HttpGet("/permit")]
+    [HttpGet("permit")]
     public string ForPermitAll()
     {
         return "Any request is permitted";
