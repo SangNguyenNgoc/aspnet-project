@@ -1,4 +1,6 @@
 using aspdotnet_project.App.Auth.Services;
+using aspdotnet_project.App.Bill.Repositories;
+using aspdotnet_project.App.Bill.Services;
 using aspdotnet_project.App.Cinema.Repositories;
 using aspdotnet_project.App.Cinema.Services;
 using aspdotnet_project.App.Movie;
@@ -82,11 +84,11 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Read environment variables
-var emailHost = Environment.GetEnvironmentVariable("STMP_SERVER");
-var emailPort = int.Parse(Environment.GetEnvironmentVariable("STMP_PORT"));
-var emailUsername = Environment.GetEnvironmentVariable("STMP_USERNAME");
-var emailPassword = Environment.GetEnvironmentVariable("STMP_PASSWORD");
-builder.Services.AddSingleton(new EmailService(emailHost, emailPort, emailUsername, emailPassword));
+var emailHost = Environment.GetEnvironmentVariable("STMP_SERVER")!;
+var emailPort = int.Parse(Environment.GetEnvironmentVariable("STMP_PORT")!);
+var emailUsername = Environment.GetEnvironmentVariable("STMP_USERNAME")!;
+var emailPassword = Environment.GetEnvironmentVariable("STMP_PASSWORD")!;
+builder.Services.AddSingleton(new EmailService(emailHost, emailPort, emailUsername!, emailPassword));
 
 
 builder.Services.AddAuthentication(options =>
@@ -119,6 +121,7 @@ builder.Services.AddScoped<IHallRepository, HallRepository>();
 builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ICinemaService, CinemaService>();
+builder.Services.AddScoped<ISeatRepository, SeatRepository>();
 // Movie
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 builder.Services.AddScoped<IFormatRepository, FormatRepository>();
