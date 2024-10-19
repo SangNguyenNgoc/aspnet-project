@@ -76,9 +76,10 @@ public class UserRepository : IUserRepository
         throw new NotImplementedException();
     }
 
-    public Task<Domain.User.Entities.User> GetUserById(string userId)
+    public async Task<Domain.User.Entities.User?> GetUserById(string userId)
     {
-        throw new NotImplementedException();
+        var user = await _context.Users.FindAsync(userId);
+        return user;
     }
 
     public Task<Domain.User.Entities.User> GetMyProfile(string userId)

@@ -13,7 +13,7 @@ public class SeatType
 
     [Column("name")] [StringLength(100)] public string Name { get; set; } = null!;
 
-    public double Price { get; set; }
+    [Column("price")] public long Price { get; set; }
 
     [InverseProperty("Type")] public virtual List<Seat> Seats { get; set; } = new();
 }

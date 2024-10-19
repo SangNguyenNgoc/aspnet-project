@@ -28,11 +28,11 @@ public static class InfrastructureDependencies
     { 
         
         services.AddDbContext<MyDbContext>(options =>
-            { 
-                var connectionString = $"Server={dbConfig.Server};Database={dbConfig.Database};User Id={dbConfig.User};Password={dbConfig.Password};";
-                var mySqlVersion = new MySqlServerVersion(new Version(8, 0, 30));
-                options.UseMySql(connectionString, mySqlVersion);
-            });
+        { 
+            var connectionString = $"Server={dbConfig.Server};Database={dbConfig.Database};User Id={dbConfig.User};Password={dbConfig.Password};";
+            var mySqlVersion = new MySqlServerVersion(new Version(8, 0, 30));
+            options.UseMySql(connectionString, mySqlVersion);
+        });
         //Cinema
         services.AddScoped<IHallRepository, HallRepository>();
         services.AddScoped<ICinemaRepository, CinemaRepository>();
@@ -73,6 +73,7 @@ public static class InfrastructureDependencies
         
         services.AddSingleton(new EmailService(mailConfig));
         services.AddSingleton(vnPayConfig);
+        services.AddSingleton<VnPayService>();
         
         return services;
     }

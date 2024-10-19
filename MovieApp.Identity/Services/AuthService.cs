@@ -40,7 +40,7 @@ public class AuthService : IAuthService
             CreateDate = DateTime.Now,
             Avatar = _config["Url:DefaultAvatar"] ?? "",
             Gender = Gender.Unknown,
-            Status = 1
+            Status = 1,
         };
         var createdUser = await _userManager.CreateAsync(newUser, request.Password!);
 

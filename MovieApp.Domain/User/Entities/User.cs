@@ -20,7 +20,7 @@ public class User : IdentityUser
     [Column("gender", TypeName = "enum('Female','Male','Unknown')")]
     public Gender Gender { get; set; }
 
-    [Column("change_token")] public string? ChangeToken { get; set; }
+    [Column("email_change_token")] public string? ChangeToken { get; set; }
 
     [Column("new_email")] public string? NewEmail { get; set; }
 

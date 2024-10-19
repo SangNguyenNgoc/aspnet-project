@@ -8,7 +8,7 @@ using MovieApp.Infrastructure.Context;
 
 #nullable disable
 
-namespace MovieApp.Api.Migrations
+namespace MovieApp.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
     partial class MyDbContextModelSnapshot : ModelSnapshot

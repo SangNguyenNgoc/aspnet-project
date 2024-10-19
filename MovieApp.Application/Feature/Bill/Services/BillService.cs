@@ -1,10 +1,5 @@
 ﻿using System.Globalization;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Web;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using MovieApp.Application.Exception;
 using MovieApp.Application.Feature.Bill.Dtos;
 using MovieApp.Domain.Bill.Repositories;
@@ -25,148 +20,121 @@ public class BillService : IBillService
     private readonly IShowtimeRepository _showtimeRepository;
     private readonly ITicketRepository _ticketRepository;
     private readonly IUserRepository _userRepository;
-    
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly VnPayConfig _vnPayConfig;
+
+    private readonly VnPayService _vnPayService;
 
 
-    public BillService(IHttpContextAccessor httpContextAccessor,
-        IBillRepository billRepository, IBillStatusRepository billStatusRepository,
+    public BillService(IBillRepository billRepository, IBillStatusRepository billStatusRepository,
         IShowtimeRepository showtimeRepository, ISeatRepository seatRepository, ITicketRepository ticketRepository, 
-        VnPayConfig vnPayConfig, IUserRepository userRepository)
+        IUserRepository userRepository, VnPayService vnPayService)
     {
         _billRepository = billRepository;
-        _billStatusRepository = billStatusRepository;
+        _billStatusRepository = billStatusRepository; 
         _showtimeRepository = showtimeRepository;
         _seatRepository = seatRepository;
         _ticketRepository = ticketRepository;
-        _vnPayConfig = vnPayConfig;
         _userRepository = userRepository;
-
-        _httpContextAccessor = httpContextAccessor;
-        _vnPayConfig = vnPayConfig;
+        _vnPayService = vnPayService;
     }
 
     public async Task<string> CreateBill(BillCreate billCreate, ClaimsPrincipal claimsPrincipal)
     {
         var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) 
-                     ?? throw new DataNotFoundException("User not found");
-        const int cost = 10;
-        const string id = "123";
-        var paymentUrl = await GeneratePaymentUrl(cost, id);
+                     ?? throw new UnauthorizedAccessException("Unauthorized");
+        
+        var user = await _userRepository.GetUserById(userId) ?? throw new DataNotFoundException("User not found");
+        
+        var show = await _showtimeRepository.GetShowByIdCheckDateTime(billCreate.ShowId) 
+                   ?? throw new DataNotFoundException("Show not found");
+        
+        CheckSeatInHall(billCreate.SeatIds, show.Hall);
+        await CheckSeatAreReserved(billCreate.SeatIds, billCreate.ShowId);
+
+        var seats = await _seatRepository.GetAllById(billCreate.SeatIds);
+        var totalPrice = seats.Sum(seat => seat.Type.Price);
+
+        var billStatus = await _billStatusRepository.GetBillStatusById(1) ??
+                         throw new DataNotFoundException("Bill status not found");
+
+        var billId = DateTime.Now.Ticks.ToString();
+        var paymentUrl = _vnPayService.GeneratePaymentUrl(totalPrice, billId);
+
+        var bill = new Domain.Bill.Entities.Bill
+        {
+            Id = billId,
+            Status = billStatus,
+            User = user,
+            Total = totalPrice,
+            CreateAt = DateTime.Now,
+            ExpireAt = DateTime.Now.AddMinutes(_vnPayService.getTimeOut()),
+            PaymentUrl = paymentUrl,
+            PaymentAt = null,
+            FailureAt = null,
+            FailureReason = null
+        };
+        var tickets = CreateTicket(show, seats, bill);
+        bill.Tickets = tickets;
+        await _billRepository.Create(bill);
         return paymentUrl;
     }
 
-    public Task CheckSeatInHall(List<long> seatIds, Hall hall)
+    public void CheckSeatInHall(List<long> seatIds, Hall hall)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task CheckSeatAreReserved(List<long> seatIds, string showId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<string> Payment(string billId, string responseCode, string transactionStatus, string paymentAt)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<string> GeneratePaymentUrl(long cost, string id)
-    {
-        var vnpParams = InitParams(cost, id);
-
-        var fieldNames = vnpParams.Keys.ToList();
-        fieldNames.Sort();
-
-        var hashData = new StringBuilder();
-        var query = new StringBuilder();
-        foreach (var fieldName in fieldNames)
+        var seatIdsInHall = hall.Seats
+            .Select(seat => seat.Id)
+            .ToHashSet();
+        if (seatIds.Any(seatId => !seatIdsInHall.Contains(seatId)))
         {
-            var fieldValue = vnpParams[fieldName];
-            if (string.IsNullOrEmpty(fieldValue)) continue;
-            // Build hash data
-            hashData.Append(fieldName);
-            hashData.Append('=');
-            hashData.Append(HttpUtility.UrlEncode(fieldValue, Encoding.ASCII));
-
-            // Build query
-            query.Append(HttpUtility.UrlEncode(fieldName, Encoding.ASCII));
-            query.Append('=');
-            query.Append(HttpUtility.UrlEncode(fieldValue, Encoding.ASCII));
-
-            if (fieldName == fieldNames.Last()) continue;
-            query.Append('&');
-            hashData.Append('&');
+            throw new DataNotFoundException("Data not found", ["Seats are not found"]);
         }
-
-        var queryUrl = query.ToString();
-        var vnpSecureHash = HmacSha512(_vnPayConfig.VnpayKey, hashData.ToString());
-        queryUrl += "&vnp_SecureHash=" + vnpSecureHash;
-        return Task.FromResult(_vnPayConfig.VnpayUrl + "?" + queryUrl);
     }
 
-    private string GetIpAddress()
+    public async Task CheckSeatAreReserved(List<long> seatIds, string showId)
     {
-        string ipAddress;
-        try
-        {
-            ipAddress = _httpContextAccessor.HttpContext!.Request.Headers["X-FORWARDED-FOR"]!;
-            if (string.IsNullOrEmpty(ipAddress))
-                ipAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString()!;
-        }
-        catch (System.Exception e)
-        {
-            ipAddress = "Invalid IP:" + e.Message;
-        }
+        var tickets = await _ticketRepository.GetTicketsByShowId(showId);
 
-        return ipAddress!;
+        var seatIdsAreReserved = tickets
+            .Select(ticket => ticket.Seat.Id)
+            .ToHashSet();
+
+        if (seatIdsAreReserved.Any(seatIds.Contains))
+        {
+            throw new BadRequestException("Input invalid", ["Seats are reserved"]);
+        }
     }
 
-    private Dictionary<string, string> InitParams(long cost, string id)
+    public async Task<string> Payment(string billId, string responseCode, string transactionStatus, string paymentAt)
     {
-        const string vnpVersion = "2.1.0";
-        const string vnpCommand = "pay";
-        const string orderType = "other";
-        var amount = cost * 100L;
-        var vnpIpAddr = GetIpAddress();
-
-        var vnpParams = new Dictionary<string, string>
-        {
-            { "vnp_Version", vnpVersion },
-            { "vnp_Command", vnpCommand },
-            { "vnp_TmnCode", _vnPayConfig.TmnCode },
-            { "vnp_Amount", amount.ToString() },
-            { "vnp_CurrCode", "VND" },
-            { "vnp_TxnRef", id },
-            { "vnp_OrderInfo", "Thanh toan ve xem phim:" + id },
-            { "vnp_OrderType", orderType },
-            { "vnp_Locale", "vn" },
-            { "vnp_ReturnUrl", _vnPayConfig.VnpayReturnUrl },
-            { "vnp_IpAddr", vnpIpAddr }
-        };
-
-        var cld = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "SE Asia Standard Time");
+        var bill = await _billRepository.GetByIdAsync(billId) ?? throw new DataNotFoundException("Bill not found");
         const string formatter = "yyyyMMddHHmmss";
-        var vnpCreateDate = cld.ToString(formatter, CultureInfo.InvariantCulture);
-        vnpParams["vnp_CreateDate"] = vnpCreateDate;
-
-        var expireDate = cld.AddMinutes(_vnPayConfig.TimeOut).ToString(formatter, CultureInfo.InvariantCulture);
-        vnpParams["vnp_ExpireDate"] = expireDate;
-
-        return vnpParams;
+        var dateTime = DateTime.ParseExact(paymentAt, formatter, CultureInfo.InvariantCulture);
+        if (responseCode == "00" && transactionStatus == "00")
+        {
+            var newStatus = await _billStatusRepository.GetBillStatusById(2) 
+                            ?? throw new DataNotFoundException("Bill status not found");
+            if (!string.IsNullOrEmpty(bill.FailureReason)) bill.FailureReason = null;
+            bill.Status = newStatus;
+            bill.PaymentAt = dateTime;
+            await _billRepository.UpdateAsync(bill);
+            return "Success";
+        }
+        var message = _vnPayService.GetMessage(responseCode, transactionStatus);
+        bill.FailureReason = message;
+        bill.FailureAt = dateTime;
+        return message;
     }
-
-    private static string HmacSha512(string key, string data)
+    
+    
+    public ICollection<Ticket> CreateTicket(Domain.Show.Entities.Show show, List<Seat> seats, 
+        Domain.Bill.Entities.Bill bill)
     {
-        using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(key));
-        var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-        return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
-    }
-
-    public ICollection<Ticket> CreateTicket(Domain.Show.Entities.Show show, List<Seat> seats, string showId)
-    {
-        throw new NotImplementedException();
+        return seats.Select(seat => new Ticket
+        {
+            Id = Guid.NewGuid().ToString(),
+            Bill = bill,
+            Show = show,
+            Seat = seat,
+        }).ToHashSet();
     }
     
     

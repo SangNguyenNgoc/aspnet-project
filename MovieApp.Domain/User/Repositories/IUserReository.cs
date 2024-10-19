@@ -2,7 +2,7 @@ namespace MovieApp.Domain.User.Repositories;
 
 public interface IUserRepository{
     public Task<List<Entities.User>> GetAllUsers();
-    public Task<Entities.User> GetUserById(string userId);
+    public Task<Entities.User?> GetUserById(string userId);
     public Task<Entities.User> GetMyProfile(string userId);
     public Task<bool> UpdateUser(string userId, Entities.User userInfo);
 
