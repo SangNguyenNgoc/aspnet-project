@@ -79,8 +79,7 @@ var mailConfig = new MailConfig
     Port = int.Parse(Environment.GetEnvironmentVariable("STMP_PORT")!),
     Username = Environment.GetEnvironmentVariable("STMP_USERNAME")!,
     Password = Environment.GetEnvironmentVariable("STMP_PASSWORD")!
-};
-
+}; 
 builder.Services.AddInfrastructureDependencies(dbConfig, mailConfig, vnPayConfig);
 
 builder.Services.AddApplicationDependencies();
