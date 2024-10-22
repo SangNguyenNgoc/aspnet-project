@@ -26,6 +26,7 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
             .Where(m => m.Slug == slug)
             .Include(m => m.Formats)
             .Include(m => m.Genres)
+            .Include(m => m.Status)
             .SingleOrDefaultAsync();
     }
 
