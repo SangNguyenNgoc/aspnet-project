@@ -10,13 +10,11 @@ namespace MovieApp.Infrastructure.Repositories.User;
 public class UserRepository : IUserRepository
 {
     private readonly MyDbContext _context;
-    private readonly EmailService _emailService;
     private readonly UserManager<Domain.User.Entities.User> _userManager;
 
-    public UserRepository(MyDbContext context, EmailService emailService, UserManager<Domain.User.Entities.User> userManager)
+    public UserRepository(MyDbContext context, UserManager<Domain.User.Entities.User> userManager)
     {
         _context = context;
-        _emailService = emailService;
         _userManager = userManager;
     }
 
@@ -73,7 +71,7 @@ public class UserRepository : IUserRepository
 
     public Task<List<Domain.User.Entities.User>> GetAllUsers()
     {
-        throw new NotImplementedException();
+        return _context.Users.ToListAsync();
     }
 
     public async Task<Domain.User.Entities.User?> GetUserById(string userId)
@@ -82,22 +80,23 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public Task<Domain.User.Entities.User> GetMyProfile(string userId)
+
+    public async Task<bool> UpdateUser(string userId, Domain.User.Entities.User userInfo)
     {
-        throw new NotImplementedException();
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+        user.PhoneNumber = userInfo.PhoneNumber;
+        user.DateOfBirth = userInfo.DateOfBirth;
+        user.FullName = userInfo.FullName;
+        user.Gender = userInfo.Gender;
+        await _context.SaveChangesAsync();
+        return true;
     }
 
-    public Task<bool> UpdateUser(string userId, Domain.User.Entities.User userInfo)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> ChangePassword(string userId, string changePasswordRequest)
-    {
-        throw new NotImplementedException();
-    }
     
-
     // public async Task<bool> UpdateUser(string userId, UserInfo userInfo)
     // {
     //     var user = await _context.Users.FindAsync(userId);
@@ -116,35 +115,19 @@ public class UserRepository : IUserRepository
     // }
 
 
-    public async Task<bool> ChangeEmail(string userId, string newEmail)
+    public async Task<bool> ChangeEmail(string userId, string newEmail, string token)
     {
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
         {
             return false;
         }
-
-        // Generate a confirmation token (this is a simple example, you might want to use a more secure method)
-        var token = Guid.NewGuid().ToString();
-
         // Save the token and new email in the database (you might want to create a separate table for this)
         user.ChangeToken = token;
         user.NewEmail = newEmail;
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
-
-        // Send the confirmation email (this is a placeholder, replace with actual email sending logic)
-        await SendConfirmationEmail(newEmail, token);
-
         return true;
-    }
-
-    private async Task SendConfirmationEmail(string email, string token)
-    {
-        // Implement your email sending logic here
-        // For example, you can use an email service to send the email with the confirmation link
-        var confirmationLink = $"http://localhost:5295/api/v1/user/confirm-email?token={token}";
-        await _emailService.SendEmailAsync(email, "Confirm your new email", $"Please confirm your new email by clicking the following link: {confirmationLink}");
     }
 
     public async Task<bool> ConfirmEmailChange(string token)
@@ -166,15 +149,9 @@ public class UserRepository : IUserRepository
     }
 
     // change password
-     private async Task SendEmailForgotPassword(string email, string token)
-    {
-        // Implement your email sending logic here
-        // For example, you can use an email service to send the email with the confirmation link
-        var confirmationLink = $"http://localhost:5295/api/v1/user/forgot-password?token={token}";
-        await _emailService.SendEmailAsync(email, "Confirm your change password", $"Please confirm your new email by clicking the following link: {confirmationLink}");
-    }
+    
 
-    public async Task<bool> SendForgotPassword(string email)
+    public async Task<bool> SendForgotPassword(string email, string token)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
@@ -182,14 +159,11 @@ public class UserRepository : IUserRepository
         {
             return false;
         }
-        // Generate a confirmation token (this is a simple example, you might want to use a more secure method)
-        var token = Guid.NewGuid().ToString();
-
         // Save the token and new email in the database (you might want to create a separate table for this)
         user.ChangeToken = token;
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
-        await SendEmailForgotPassword(email, token);
+        
         return true;
     }
     
@@ -228,23 +202,21 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
         return true;
     }
-    
+
     //change password
-    // public async Task<bool> ChangePassword(string userId, ChangePasswordRequest changePasswordRequest)
-    // {
-    //     var user = await _context.Users.FindAsync(userId);
-    //     if (user == null)
-    //     {
-    //         return false;
-    //     }
-    //
-    //     var result = await _userManager.ChangePasswordAsync(user, changePasswordRequest.oldPassword, changePasswordRequest.NewPassword);
-    //     if (!result.Succeeded)
-    //     {
-    //         return false;
-    //     }
-    //
-    //     return true;
-    // }
+    public async Task<bool> ChangePassword(string userId, string oldPassword, string newPassword)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+        if (!await _userManager.CheckPasswordAsync(user, oldPassword))
+        {
+            return false;
+        }
+        var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+        return true;
+    }
 }
 

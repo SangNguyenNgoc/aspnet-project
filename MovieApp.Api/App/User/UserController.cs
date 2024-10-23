@@ -17,60 +17,59 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet("/all")]
+    [HttpGet("all")]
     //[Authorize(Roles = "Admin")]
     public async Task<List<UserInfo>> GetAllUsers()
     {
         return await _userService.GetAllUsers();
     }
 
-    [HttpGet("/profile")]
-    [Authorize]
+    [HttpGet("profile")]
+    //[Authorize]
     public async Task<IActionResult> MyProfile()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return BadRequest("User ID not found.");
-        var user = await _userService.GetMyProfile(userId);
+        var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userID)) return BadRequest("User ID not found.");
+        var user = await _userService.GetMyProfile(userID);
         if (user == null) return BadRequest("User ID not found.");
-
         return Ok(user);
     }
 
-    [HttpPut("/update")]
-    [Authorize]
-    public async Task<IActionResult> UpdateProfile([FromBody] UserInfo userInfo)
+    [HttpPut("update")]
+    //[Authorize]
+    public async Task<IActionResult> UpdateProfile([FromBody] UserUpdateRequest userUpdate)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId)) return BadRequest("User ID not found.");
-        var result = await _userService.UpdateUser(userId, userInfo);
-        if (!result) return NotFound();
-
+        var result = await _userService.UpdateUser(userId,userUpdate);
+        if (!result) return BadRequest("Failed to update user.");
         return Ok(new { message = "Update successfully." });
     }
 
-    [HttpGet("/{userId}")]
+    [HttpGet("{userId}")]
     //[Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetUserById(string userId)
     {
         var user = await _userService.GetUserById(userId);
-        if (user == null) return NotFound();
-
+        if (user == null) return BadRequest("User ID not found.");
         return Ok(user);
     }
 
 
     [HttpPost("change-email")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await _userService.ChangeEmail(userId, request.NewEmail);
+        if (string.IsNullOrEmpty(userId)) return BadRequest("User ID not found.");
+        if (string.IsNullOrEmpty(request.newEmail)) return BadRequest("New email is required.");
+        var result = await _userService.ChangeEmail(userId, request.newEmail);
         if (!result) return BadRequest("Failed to initiate email change.");
         return Ok("Confirmation email sent.");
     }
 
     [HttpGet("confirm-email")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> ConfirmEmailChange([FromQuery] string token)
     {
         var result = await _userService.ConfirmEmailChange(token);
@@ -104,11 +103,11 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("change-password")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await _userService.ChangePassword(userId, request);
+        var result = await _userService.ChangePassword(userId, request.oldPassword, request.newPassword, request.confirmPassword);
         if (!result) return BadRequest("Failed to change password.");
         return Ok("Password changed successfully.");
     }
