@@ -18,6 +18,17 @@ builder.Services.AddControllers(options => { options.Filters.Add(new AppExceptio
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer(); 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policyBuilder =>
+    {
+        policyBuilder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
@@ -89,6 +100,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseCors("AllowAll");
 
 app.UseRouting();
 app.MapControllers();
