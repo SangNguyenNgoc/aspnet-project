@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MovieApp.Application.Feature.User.Dtos;
 using MovieApp.Application.Feature.User.Service;
+using UserUpdateRequest = MovieApp.Application.Feature.User.Dtos.UserUpdateRequest;
 
 namespace MovieApp.Api.App.User;
 
