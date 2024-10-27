@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Security.Claims;
+using AutoMapper;
 using MovieApp.Application.Exception;
 using MovieApp.Application.Feature.Bill.Dtos;
 using MovieApp.Domain.Bill.Repositories;
@@ -22,11 +23,12 @@ public class BillService : IBillService
     private readonly IUserRepository _userRepository;
 
     private readonly VnPayService _vnPayService;
+    private readonly IMapper _mapper;
 
 
     public BillService(IBillRepository billRepository, IBillStatusRepository billStatusRepository,
         IShowtimeRepository showtimeRepository, ISeatRepository seatRepository, ITicketRepository ticketRepository, 
-        IUserRepository userRepository, VnPayService vnPayService)
+        IUserRepository userRepository, VnPayService vnPayService, IMapper mapper)
     {
         _billRepository = billRepository;
         _billStatusRepository = billStatusRepository; 
@@ -35,13 +37,12 @@ public class BillService : IBillService
         _ticketRepository = ticketRepository;
         _userRepository = userRepository;
         _vnPayService = vnPayService;
+        _mapper = mapper;
     }
 
-    public async Task<string> CreateBill(BillCreate billCreate, ClaimsPrincipal claimsPrincipal)
+    
+    public async Task<string> CreateBill(BillCreate billCreate, string userId)
     {
-        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) 
-                     ?? throw new UnauthorizedAccessException("Unauthorized");
-        
         var user = await _userRepository.GetUserById(userId) ?? throw new DataNotFoundException("User not found");
         
         var show = await _showtimeRepository.GetShowByIdCheckDateTime(billCreate.ShowId) 
@@ -78,6 +79,7 @@ public class BillService : IBillService
         return paymentUrl;
     }
 
+    
     public void CheckSeatInHall(List<long> seatIds, Hall hall)
     {
         var seatIdsInHall = hall.Seats
@@ -88,6 +90,7 @@ public class BillService : IBillService
             throw new DataNotFoundException("Data not found", ["Seats are not found"]);
         }
     }
+    
 
     public async Task CheckSeatAreReserved(List<long> seatIds, string showId)
     {
@@ -103,6 +106,7 @@ public class BillService : IBillService
         }
     }
 
+    
     public async Task<string> Payment(string billId, string responseCode, string transactionStatus, string paymentAt)
     {
         var bill = await _billRepository.GetByIdAsync(billId) ?? throw new DataNotFoundException("Bill not found");
@@ -136,6 +140,101 @@ public class BillService : IBillService
             Seat = seat,
         }).ToHashSet();
     }
+
+    
+    public async Task<ICollection<BillInfo>> GetBillsByUser(string userId)
+    {
+        var bills = await _billRepository.GetByUserIdAsync(userId);
+        var billsIds = bills.Select(bill => bill.Id).ToList();
+        var ticketPerBills = await _ticketRepository.GetAllTicketByBillIdGroupByBillId(billsIds);
+        var billDetails = bills.Select(bill =>
+        {
+            var billInfo = _mapper.Map<BillInfo>(bill);
+            ticketPerBills.TryGetValue(bill.Id, out var ticket);
+            
+            if (ticket == null) return billInfo;
+            billInfo.Show = new BillInfo.ShowDtoInBillInfo
+            {
+                Id = ticket.Show.Id,
+                RunningTime = ticket.Show.RunningTime,
+                StartDate = ticket.Show.StartDate,
+                StartTime = ticket.Show.StartTime,
+                Format = ticket.Show.Format.Version + " " + ticket.Show.Format.Caption
+            };
+            
+            billInfo.Movie = new BillInfo.MovieDtoInBillInfo
+            {
+                Id = ticket.Show.Movie.Id,
+                Name = ticket.Show.Movie.Name,
+                SubName = ticket.Show.Movie.SubName,
+                Poster = ticket.Show.Movie.Poster,
+                HorizontalPoster = ticket.Show.Movie.HorizontalPoster
+            };
+            return billInfo;
+        }).ToList();
+        
+        return billDetails;
+    }
+
+
+    private async Task<BillDetail> GetBillDetail(string billId, string? userId = null)
+    {
+        var bill = await _billRepository.GetBillDetailById(billId) 
+                   ?? throw new DataNotFoundException("Bill not found");
+
+        if (userId != null && bill.User.Id != userId)
+        {
+            throw new UnauthorizedAccessException();
+        }
+        var billDetail = await MapBillDetail(bill);
+
+        return billDetail;
+    }
+
+    
+    private async Task<BillDetail> MapBillDetail(Domain.Bill.Entities.Bill bill)
+    {
+        var billDetail = _mapper.Map<BillDetail>(bill);
+    
+        var ticketDetail = await _ticketRepository.GetTicketDetailById(bill.Tickets.First().Id)
+                           ?? throw new DataNotFoundException("Ticket not found");
+
+        billDetail.Customer = new BillDetail.UserDtoInBillDetail
+        {
+            Fullname = bill.User.FullName,
+            Email = bill.User.Email!
+        };
+
+        billDetail.Show = new BillDetail.ShowDtoInBillDetail
+        {
+            Id = ticketDetail.Show.Id,
+            RunningTime = ticketDetail.Show.RunningTime,
+            StartDate = ticketDetail.Show.StartDate,
+            StartTime = ticketDetail.Show.StartTime,
+            Format = ticketDetail.Show.Format.Version + " " + ticketDetail.Show.Format.Caption
+        };
+
+        billDetail.Movie = new BillDetail.MovieDtoInBillDetail
+        {
+            Id = ticketDetail.Show.Movie.Id,
+            Name = ticketDetail.Show.Movie.Name,
+            SubName = ticketDetail.Show.Movie.SubName,
+            Poster = ticketDetail.Show.Movie.Poster,
+            HorizontalPoster = ticketDetail.Show.Movie.HorizontalPoster
+        };
+
+        return billDetail;
+    }
+
+    
+    public Task<BillDetail> GetBillDetailByUser(string billId, string userId) => GetBillDetail(billId, userId);
     
     
+    public Task<BillDetail> GetBillDetailByAdmin(string billId) => GetBillDetail(billId);
+
+
+    public async Task UpdateBillsExpired(DateTime dateTime)
+    {
+        await _billRepository.UpdateExpiredBillsStatus(dateTime);
+    }
 }

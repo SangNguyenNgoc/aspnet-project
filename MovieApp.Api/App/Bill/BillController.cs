@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MovieApp.Application.Feature.Bill.Dtos;
 using MovieApp.Application.Feature.Bill.Services;
@@ -17,9 +18,12 @@ public class BillController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CreateBill([FromBody] BillCreate billCreate)
     {
-        var result = await _billService.CreateBill(billCreate, User);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+                     ?? throw new UnauthorizedAccessException("Unauthorized");
+        var result = await _billService.CreateBill(billCreate, userId);
         return Ok(result);
     }
     
@@ -40,6 +44,45 @@ public class BillController : ControllerBase
         [FromQuery(Name = "vnp_SecureHash")] string secureHash)
     {
         var result = await _billService.Payment(txnRef, responseCode, transactionStatus, payDate);
+        return Ok(result);
+    }
+
+    [HttpGet("curr-user")]
+    [Authorize]
+    public async Task<IActionResult> GetBillsByCurrentUser()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+                     ?? throw new UnauthorizedAccessException("Unauthorized");
+        var result = await _billService.GetBillsByUser(userId);
+        return Ok(result);
+    }
+    
+    
+    [HttpGet("curr-user/{billId}")]
+    [Authorize]
+    public async Task<IActionResult> GetBillDetailByUser(string billId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+                     ?? throw new UnauthorizedAccessException("Unauthorized");
+        var result = await _billService.GetBillDetailByUser(billId, userId);
+        return Ok(result);
+    }
+    
+    
+    [HttpGet("user/{userId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetBillsByUser(string userId)
+    {
+        var result = await _billService.GetBillsByUser(userId);
+        return Ok(result);
+    }
+    
+    
+    [HttpGet("{billId}")]
+    [Authorize]
+    public async Task<IActionResult> GetBillDetailByAdmin(string billId)
+    {
+        var result = await _billService.GetBillDetailByAdmin(billId);
         return Ok(result);
     }
 

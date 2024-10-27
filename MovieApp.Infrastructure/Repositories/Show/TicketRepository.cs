@@ -26,4 +26,29 @@ public class TicketRepository : ITicketRepository
             .OrderBy(t => t.Seat.Order)
             .ToListAsync();
     }
+
+    public async Task<Ticket?> GetTicketDetailById(string ticketId)
+    {
+        return await _context.Tickets
+            .Include(t => t.Show) 
+                .ThenInclude(s => s.Movie)
+            .Include(t => t.Show)
+                .ThenInclude(s => s.Format)
+            .FirstOrDefaultAsync(t => t.Id == ticketId);
+    }
+
+    public async Task<Dictionary<string, Ticket?>> GetAllTicketByBillIdGroupByBillId(List<string> billIds)
+    {
+        return await _context.Tickets
+            .Where(ticket => billIds.Contains(ticket.Bill.Id))
+            .Include(ticket => ticket.Show)
+                .ThenInclude(show => show.Movie)
+            .Include(ticket => ticket.Show)
+                .ThenInclude(show => show.Format)
+            .GroupBy(ticket => ticket.Bill.Id)
+            .ToDictionaryAsync(
+                group => group.Key,             
+                group => group.FirstOrDefault() 
+            );
+    }
 }

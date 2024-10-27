@@ -7,7 +7,7 @@ namespace MovieApp.Application.Feature.Bill.Services;
 
 public interface IBillService
 {
-    Task<string> CreateBill(BillCreate billCreate, ClaimsPrincipal claimsPrincipal);
+    Task<string> CreateBill(BillCreate billCreate, string userId);
 
     void CheckSeatInHall(List<long> seatIds, Hall hall);
 
@@ -16,4 +16,12 @@ public interface IBillService
     ICollection<Ticket> CreateTicket(Domain.Show.Entities.Show show, List<Seat> seats, Domain.Bill.Entities.Bill bill);
 
     Task<string> Payment(string billId, string responseCode, string transactionStatus, string paymentAt);
+
+    Task<ICollection<BillInfo>> GetBillsByUser(string userId);
+
+    Task<BillDetail> GetBillDetailByUser(string billId, string userId);
+    
+    Task<BillDetail> GetBillDetailByAdmin(string billId);
+    
+    Task UpdateBillsExpired(DateTime dateTime);
 }

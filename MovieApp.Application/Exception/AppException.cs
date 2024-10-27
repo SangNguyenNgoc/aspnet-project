@@ -6,7 +6,7 @@ public class AppException : System.Exception
 
     public readonly List<string> Messages = [];
 
-    public AppException(string message, int errorCode) : base(message)
+    protected AppException(string message, int errorCode) : base(message)
     {
         ErrorCode = errorCode;
     }
