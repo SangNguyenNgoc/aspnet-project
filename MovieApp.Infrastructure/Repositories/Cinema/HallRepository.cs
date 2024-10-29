@@ -28,4 +28,13 @@ public class HallRepository : IHallRepository
             // Nếu không có hội trường nào có show thì trả về danh sách hội trường
             halls;
     }
+    
+    public async Task<long> Save(Hall hall)
+    {
+        var newHall = await _context.Halls.AddAsync(hall);
+        await _context.SaveChangesAsync();
+        // await _context.Seats.AddRangeAsync(hall.Seats);
+        // await _context.SaveChangesAsync();
+        return newHall.Entity.Id;
+    }
 }

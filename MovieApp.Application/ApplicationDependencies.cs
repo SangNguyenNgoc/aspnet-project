@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using MovieApp.Application.BackgroundTasks.UpdateBill;
 using MovieApp.Application.Feature.Bill.Services;
 using MovieApp.Application.Feature.Cinema.Services;
 using MovieApp.Application.Feature.Movie;
 using MovieApp.Application.Feature.Movie.Services;
 using MovieApp.Application.Feature.Show.Services;
 using MovieApp.Application.Feature.User.Service;
-using Quartz;
 
 namespace MovieApp.Application;
 
@@ -22,6 +20,8 @@ public static class ApplicationDependencies
         services.AddScoped<IShowtimeService, ShowtimeService>();
         services.AddScoped<IBillService, BillService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ISeatTypeService, SeatTypeService>();
+        services.AddScoped<IHallService, HallService>();
 
         services.AddQuartz();
         services.AddQuartzHostedService(options =>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieApp.Application.Feature.Movie.Dtos;
 using MovieApp.Application.Feature.Movie.Services;
 
 namespace MovieApp.Api.App.Movie;
@@ -36,5 +37,17 @@ public class MovieController : ControllerBase
     public async Task<IActionResult> GetMoviesShowingNow([FromQuery] int page, [FromQuery] int perPage)
     {
         return Ok(await _movieService.GetMovieByStatus("showing-now", page, perPage));
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateMovie([FromForm] MovieCreateRequest movieCreateRequest)
+    {
+        return Ok(await _movieService.CreateMovie(movieCreateRequest));
+    }
+    
+    [HttpGet("status")]
+    public async Task<IActionResult> GetAllStatus()
+    {
+        return Ok(await _movieService.GetAllStatus());
     }
 }

@@ -5,4 +5,5 @@ namespace MovieApp.Domain.Cinema.Repositories;
 public interface ILocationRepository
 {
     Task<List<Location>> GetAllLocationAndCinema();
+    Task<Location?> GetLocationById(long id);
 }

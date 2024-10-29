@@ -1,6 +1,9 @@
-﻿namespace MovieApp.Domain.Movie.Repositories;
+﻿using MovieApp.Domain.Movie.Entities;
+
+namespace MovieApp.Domain.Movie.Repositories;
 
 public interface IFormatRepository
 {
-    Task<Entities.Format?> GetMovieById(long id);
+    Task<Entities.Format?> GetById(long id);
+    Task<List<Format>> GetAll();
 }

@@ -1,4 +1,5 @@
-﻿using MovieApp.Application.Feature.Movie.Dtos;
+﻿using MovieApp.Application.Feature.Cinema.Dtos;
+using MovieApp.Application.Feature.Movie.Dtos;
 
 namespace MovieApp.Application.Feature.Show.Dtos;
 
@@ -32,7 +33,7 @@ public class ShowtimeDetail
         public String Name { get; set; }
         public int TotalSeats { get; set; }
         public int AvailableSeats { get; set; }
-        public List<SeatDto> Seats { get; set; }
+        public List<RowDto> Rows { get; set; }
         public CinemaDto Cinema { get; set; }
         
         public class CinemaDto
@@ -41,14 +42,23 @@ public class ShowtimeDetail
             public string Name { get; set; }
         }
         
-        public class SeatDto
+        public class RowDto
         {
-            public long Id { get; set; }
-            public bool Status { get; set; }
-            public int RowIndex { get; set; }
             public string RowName { get; set; }
-            public int Order { get; set; }
-            public bool isReserved { get; set; }
+            public List<SeatDto> Seats { get; set; }
+            
+            public class SeatDto
+            {
+                public long Id { get; set; }
+                public bool Status { get; set; }
+                public int RowIndex { get; set; }
+                // public string RowName { get; set; }
+                public int Order { get; set; }
+                public bool isReserved { get; set; }
+                public SeatTypeResponse SeatType { get; set; }
+            }
         }
+        
+        
     }
 }

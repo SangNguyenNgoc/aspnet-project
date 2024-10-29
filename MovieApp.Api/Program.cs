@@ -6,6 +6,7 @@ using MovieApp.Identity;
 using MovieApp.Infrastructure;
 using MovieApp.Infrastructure.Context;
 using MovieApp.Infrastructure.Mail;
+using MovieApp.Infrastructure.S3;
 using MovieApp.Infrastructure.VnPay;
 
 Env.Load();
@@ -79,8 +80,17 @@ var mailConfig = new MailConfig
     Port = int.Parse(Environment.GetEnvironmentVariable("STMP_PORT")!),
     Username = Environment.GetEnvironmentVariable("STMP_USERNAME")!,
     Password = Environment.GetEnvironmentVariable("STMP_PASSWORD")!
-}; 
-builder.Services.AddInfrastructureDependencies(dbConfig, mailConfig, vnPayConfig);
+};
+
+var s3Config = new S3Config
+{
+    AccessKey = Environment.GetEnvironmentVariable("S3_ACCESS_KEY")!,
+    SecretKey = Environment.GetEnvironmentVariable("S3_SECRET_KEY")!,
+    EndpointUrl = Environment.GetEnvironmentVariable("ENDPOINT")!,
+    Region = Environment.GetEnvironmentVariable("REGION")!
+};
+
+builder.Services.AddInfrastructureDependencies(dbConfig, mailConfig, vnPayConfig, s3Config);
 
 builder.Services.AddApplicationDependencies();
 
@@ -98,12 +108,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthorization();
 app.UseCors("AllowAll");
 
 app.UseRouting();
-
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

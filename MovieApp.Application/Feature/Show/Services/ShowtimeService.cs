@@ -56,7 +56,18 @@ public class ShowtimeService : IShowtimeService
         if (show == null) throw new DataNotFoundException($"Show {showId} not found");
         var tickets = await _ticketRepository.GetTicketsByShowId(showId);
         var showtimeDetail = _mapper.Map<ShowtimeDetail>(show);
-        foreach (var t in tickets) showtimeDetail.Hall.Seats.Find(s => s.Order == t.Seat.Order)!.isReserved = true;
+        showtimeDetail.Hall.Rows = show.Hall.Seats.GroupBy(s => s.RowName).Select(s =>
+        {
+            var row = new ShowtimeDetail.HallDto.RowDto ();
+            row.RowName = s.Key;
+            row.Seats = s.Select(seat =>
+            {
+                var seatDto = _mapper.Map<ShowtimeDetail.HallDto.RowDto.SeatDto>(seat);
+                seatDto.isReserved = tickets.Exists(t => t.Seat.Id == seat.Id);
+                return seatDto;
+            }).ToList();
+            return row;
+        }).ToList();
         return showtimeDetail;
     }
 
@@ -129,7 +140,7 @@ public class ShowtimeService : IShowtimeService
             var newShow = new Domain.Show.Entities.Show
             {
                 Movie = await _movieRepository.GetMovieById(bestMovie.Id!),
-                Format = (await _formatRepository.GetMovieById(bestMovie.FormatId))!,
+                Format = (await _formatRepository.GetById(bestMovie.FormatId))!,
                 Hall = hall,
                 RunningTime = bestMovie.Duration,
                 StartDate = DateOnly.FromDateTime(startDate),
