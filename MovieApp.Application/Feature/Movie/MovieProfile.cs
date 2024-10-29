@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MovieApp.Application.Feature.Movie.Dtos;
 using MovieApp.Domain.Movie.Entities;
+using MovieApp.Infrastructure.S3;
 
 namespace MovieApp.Application.Feature.Movie;
 
@@ -30,5 +31,15 @@ public class MovieProfile : Profile
                 .OrderBy(s => s.StartDate)
                 .ThenBy(s => s.StartTime)
             ));
+
+        CreateMap<StatusResponse, MovieStatus>().ReverseMap();
+
+        CreateMap<MovieCreateRequest, Domain.Movie.Entities.Movie>()
+            .ForMember(dest => dest.Poster, opt => opt.Ignore())
+            .ForMember(dest => dest.HorizontalPoster, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.Formats, opt => opt.Ignore())
+            .ForMember(dest => dest.Genres, opt => opt.Ignore());
+            
     }
 }

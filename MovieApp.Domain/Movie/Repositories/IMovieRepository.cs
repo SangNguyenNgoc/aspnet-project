@@ -7,4 +7,5 @@ public interface IMovieRepository
     Task<Entities.Movie?> GetMovieBySlug(string slug);
     Task<List<Entities.Movie>> GetMovieByStatusAndOrderByRating(string slug);
     Task<List<Entities.Movie>> GetMovieAndShowByCinemaId();
+    Task<string> Save(Domain.Movie.Entities.Movie movie);
 }

@@ -5,6 +5,7 @@ using MovieApp.Application.Feature.Movie.Dtos;
 using MovieApp.Application.Feature.Show.Dtos;
 using MovieApp.Domain.Cinema.Repositories;
 using MovieApp.Domain.Movie.Repositories;
+using MovieApp.Infrastructure.S3;
 
 namespace MovieApp.Application.Feature.Movie.Services;
 
@@ -14,14 +15,20 @@ public class MovieService : IMovieService
     private readonly IMapper _mapper;
     private readonly IMovieRepository _movieRepository;
     private readonly IMovieStatusRepository _movieStatusRepository;
+    private readonly IFormatRepository _formatRepository;
+    private readonly IGenreRepository _genreRepository;
+    private readonly S3Service _s3Service;
 
     public MovieService(IMapper mapper, IMovieRepository movieRepository, IMovieStatusRepository movieStatusRepository,
-        ICinemaRepository cinemaRepository)
+        ICinemaRepository cinemaRepository, S3Service s3Service, IFormatRepository formatRepository, IGenreRepository genreRepository)
     {
         _mapper = mapper;
         _movieRepository = movieRepository;
         _movieStatusRepository = movieStatusRepository;
         _cinemaRepository = cinemaRepository;
+        _s3Service = s3Service;
+        _formatRepository = formatRepository;
+        _genreRepository = genreRepository;
     }
 
     public async Task<List<StatusInfo>> GetMovieToLanding()
@@ -99,5 +106,42 @@ public class MovieService : IMovieService
 
         movieDetail.Cinemas = cinemaAndShow;
         return movieDetail;
+    }
+
+    public async Task<string> CreateMovie(MovieCreateRequest movieCreateRequest)
+    {
+        var newMovie = _mapper.Map<Domain.Movie.Entities.Movie>(movieCreateRequest);
+        var slug = AppUtil.GenerateSlug(newMovie.Name);
+        var status = await _movieStatusRepository.FindById(movieCreateRequest.Status)
+            ?? throw new DataNotFoundException($"Status {movieCreateRequest.Status} not found");
+
+        var formats = await _formatRepository.GetAll();
+        var genres = await _genreRepository.GetAll();
+        if (movieCreateRequest.Formats.Any(id => !formats.Exists(f => f.Id == id)))
+        {
+            throw new DataNotFoundException($"Format not found");
+        }
+        
+        if (movieCreateRequest.Genres.Any(id => !genres.Exists(g => g.Id == id)))
+        {
+            throw new DataNotFoundException($"Genre not found");
+        }
+        
+        newMovie.HorizontalPoster = await _s3Service.UploadFile(movieCreateRequest.HorizontalPoster, slug + "-horizontal", "posters");
+        newMovie.Poster = await _s3Service.UploadFile(movieCreateRequest.Poster, slug, "posters");
+        newMovie.Slug = slug;
+        
+        newMovie.Status = status;
+        
+        newMovie.Formats = formats.Where(f => movieCreateRequest.Formats.Contains(f.Id)).ToList();
+        newMovie.Genres = genres.Where(g => movieCreateRequest.Genres.Contains(g.Id)).ToList();
+        
+        return await _movieRepository.Save(newMovie);
+    }
+    
+    public async Task<StatusResponse> GetAllStatus()
+    {
+        var status = await _movieStatusRepository.GetAll();
+        return _mapper.Map<StatusResponse>(status);
     }
 }

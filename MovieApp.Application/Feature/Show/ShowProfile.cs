@@ -16,8 +16,9 @@ public class ShowProfile : AutoMapper.Profile
         
         CreateMap<Hall, ShowtimeDetail.HallDto>()
             .ForMember(dest => dest.Cinema, opt => opt.MapFrom(src => src.Cinema))
-            .ForMember(dest => dest.Seats, opt => opt.MapFrom(src => src.Seats));
+            .ForMember(dest => dest.Rows, opt => opt.Ignore());
         CreateMap<Domain.Cinema.Entities.Cinema, ShowtimeDetail.HallDto.CinemaDto>();
-        CreateMap<Seat, ShowtimeDetail.HallDto.SeatDto>();
+        CreateMap<Seat, ShowtimeDetail.HallDto.RowDto.SeatDto>()
+            .ForMember(dest => dest.SeatType, opt => opt.MapFrom(src => src.Type));
     }
 }

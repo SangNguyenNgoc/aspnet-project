@@ -21,4 +21,11 @@ public class LocationRepository : ILocationRepository
             .ToListAsync();
 
     }
+    
+    public async Task<Location?> GetLocationById(long id)
+    {
+        return await _context.Locations
+            .Include(l => l.Cinemas)
+            .FirstOrDefaultAsync(l => l.Id == id);
+    }
 }

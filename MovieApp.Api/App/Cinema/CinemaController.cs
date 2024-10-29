@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MovieApp.Application.Feature.Cinema.Dtos;
 using MovieApp.Application.Feature.Cinema.Services;
 
 namespace MovieApp.Api.App.Cinema;
@@ -8,15 +9,53 @@ namespace MovieApp.Api.App.Cinema;
 public class CinemaController : ControllerBase
 {
     private readonly ICinemaService _cinemaService;
+    private readonly IHallService _hallService;
 
-    public CinemaController(ICinemaService cinemaService)
+    public CinemaController(ICinemaService cinemaService, IHallService hallService)
     {
         _cinemaService = cinemaService;
+        _hallService = hallService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetCinemas()
     {
         return Ok(await _cinemaService.GetAllCinemas());
+    }
+    
+    [HttpGet(template:"admin")]
+    public async Task<IActionResult> GetCinemasAdmin()
+    {
+        return Ok(await _cinemaService.GetCinemaAdmin());
+    }
+    
+    [HttpGet(template:"status")]
+    public async Task<IActionResult> GetCinemaStatus()
+    {
+        return Ok(await _cinemaService.GetAllStatus());
+    }
+    
+    [HttpGet(template:"location")]
+    public async Task<IActionResult> GetCinemaLocation()
+    {
+        return Ok(await _cinemaService.GetAllLocation());
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> SaveCinema([FromBody] CinemaCreated cinemaRequest)
+    {
+        return Ok(await _cinemaService.SaveCinema(cinemaRequest));
+    }
+    
+    [HttpGet("hall/status")]
+    public async Task<IActionResult> GetHallStatus()
+    {
+        return Ok(await _hallService.GetHallStatus());
+    }
+    
+    [HttpPost("{cinemaId}/hall")]
+    public async Task<IActionResult> SaveHall(string cinemaId, [FromBody] HallCreated hallRequest)
+    {
+        return Ok(await _hallService.SaveHall(cinemaId, hallRequest));
     }
 }

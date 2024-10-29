@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using MovieApp.Application.Exception;
 using MovieApp.Application.Feature.Cinema.Dtos;
 using MovieApp.Application.Feature.Movie.Dtos;
+using MovieApp.Application.Feature.Movie.Services;
 using MovieApp.Application.Feature.Show.Dtos;
 using MovieApp.Domain.Cinema.Repositories;
 using MovieApp.Domain.Movie.Entities;
@@ -14,13 +16,15 @@ public class CinemaService : ICinemaService
     private readonly ICinemaRepository _cinemaRepository;
     private readonly ILocationRepository _locationRepository;
     private readonly IMovieRepository _movieRepository;
+    private readonly ICinemaStatusRepository _cinemaStatusRepository;
 
-    public CinemaService(IMapper mapper, ICinemaRepository cinemaRepository, ILocationRepository locationRepository, IMovieRepository movieRepository)
+    public CinemaService(IMapper mapper, ICinemaRepository cinemaRepository, ILocationRepository locationRepository, IMovieRepository movieRepository, ICinemaStatusRepository cinemaStatusRepository)
     {
         _mapper = mapper;
         _cinemaRepository = cinemaRepository;
         _locationRepository = locationRepository;
         _movieRepository = movieRepository;
+        _cinemaStatusRepository = cinemaStatusRepository;
     }
 
     public async Task<List<LocationAndCinema>> GetAllCinemas()
@@ -39,6 +43,11 @@ public class CinemaService : ICinemaService
         }
 
         return result;
+    }
+
+    public async Task<List<CinemaDetail>> GetCinemaAdmin()
+    {
+        return _mapper.Map<List<CinemaDetail>>(await _cinemaRepository.GetCinemaAdmin());
     }
 
     private List<LocationAndCinema.CinemaDto.MovieDto> GetMovieAndFormat(string cinemaId, List<Domain.Movie.Entities.Movie> movies)
@@ -67,6 +76,30 @@ public class CinemaService : ICinemaService
             .Where(m => m.Formats.Count > 0)
             .ToList();
         return movieResult;
+    }
+    
+    public async Task<string> SaveCinema(CinemaCreated cinemaRequest)
+    {
+        var location = await _locationRepository.GetLocationById(cinemaRequest.Location) ??
+                       throw new DataNotFoundException($"Location with id {cinemaRequest.Location} not found");
+        var status = await _cinemaStatusRepository.GetById(cinemaRequest.Status) ??
+                     throw new DataNotFoundException($"Status with id {cinemaRequest.Status} not found");
+        var cinema = _mapper.Map<Domain.Cinema.Entities.Cinema>(cinemaRequest);
+        var slug = AppUtil.GenerateSlug(cinemaRequest.Name);
+        cinema.Location = location;
+        cinema.Status = status;
+        cinema.Slug = slug;
+        return await _cinemaRepository.Save(cinema);
+    }
+
+    public async Task<CinemaStatusResponse> GetAllStatus()
+    {
+        return _mapper.Map<CinemaStatusResponse>(await _cinemaStatusRepository.GetAll());
+    }
+
+    public async Task<List<LocationResponse>> GetAllLocation()
+    {
+        return _mapper.Map<List<LocationResponse>>(await _locationRepository.GetAllLocationAndCinema());
     }
 
 }

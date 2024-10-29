@@ -30,7 +30,11 @@ public class ShowtimeRepository(MyDbContext context) : IShowtimeRepository
             .Include(s => s.Hall)
             .ThenInclude(h => h.Cinema)
             .Include(s => s.Hall)
-            .ThenInclude(h => h.Seats.OrderBy(s => s.Order))
+            .ThenInclude(h => h.Seats
+                .OrderBy(s => s.RowName)
+                .ThenBy(s => s.RowIndex)
+            )
+            .ThenInclude(s => s.Type)
             .Include(s => s.Format)
             .FirstOrDefaultAsync();
     }

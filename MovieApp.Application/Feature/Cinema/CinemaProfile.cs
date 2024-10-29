@@ -1,4 +1,5 @@
 ﻿using MovieApp.Application.Feature.Cinema.Dtos;
+using MovieApp.Application.Feature.Show.Dtos;
 using MovieApp.Domain.Cinema.Entities;
 using MovieApp.Domain.Movie.Entities;
 
@@ -24,6 +25,30 @@ public class CinemaProfile : AutoMapper.Profile
         // Mapping for MovieDto
         CreateMap<Domain.Movie.Entities.Movie, LocationAndCinema.CinemaDto.MovieDto>()
             .ForMember(dest => dest.Formats, opt => opt.Ignore());
+        
+        CreateMap<Domain.Cinema.Entities.Cinema, CinemaDetail>()
+            .ForMember(dest => 
+                dest.location, opt => opt.MapFrom(src => src.Location.Name)); // Map Location Name
+
+        CreateMap<SeatType, SeatTypeResponse>();
+
+        CreateMap<CinemaStatus, CinemaStatusResponse>();
+
+        CreateMap<Location, LocationResponse>();
+        
+        CreateMap<CinemaCreated, Domain.Cinema.Entities.Cinema>()
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.Location, opt => opt.Ignore())
+            .ForMember(dest => dest.Slug , opt => opt.Ignore());
+
+        CreateMap<HallStatus, HallStatusResponse>();
+
+        CreateMap<HallCreated, Hall>()
+            .ForMember(dest => dest.Seats, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore());
+
+        CreateMap<HallCreated.SeatCreated, Seat>()
+            .ForMember(dest => dest.Type, opt => opt.Ignore());
     }
     
 }

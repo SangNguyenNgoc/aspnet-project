@@ -20,6 +20,8 @@ public static class ApplicationDependencies
         services.AddScoped<IShowtimeService, ShowtimeService>();
         services.AddScoped<IBillService, BillService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ISeatTypeService, SeatTypeService>();
+        services.AddScoped<IHallService, HallService>();
         return services;
     } 
 }

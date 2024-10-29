@@ -6,6 +6,7 @@ using MovieApp.Identity;
 using MovieApp.Infrastructure;
 using MovieApp.Infrastructure.Context;
 using MovieApp.Infrastructure.Mail;
+using MovieApp.Infrastructure.S3;
 using MovieApp.Infrastructure.VnPay;
 
 Env.Load();
@@ -81,7 +82,15 @@ var mailConfig = new MailConfig
     Password = Environment.GetEnvironmentVariable("STMP_PASSWORD")!
 };
 
-builder.Services.AddInfrastructureDependencies(dbConfig, mailConfig, vnPayConfig);
+var s3Config = new S3Config
+{
+    AccessKey = Environment.GetEnvironmentVariable("S3_ACCESS_KEY")!,
+    SecretKey = Environment.GetEnvironmentVariable("S3_SECRET_KEY")!,
+    EndpointUrl = Environment.GetEnvironmentVariable("ENDPOINT")!,
+    Region = Environment.GetEnvironmentVariable("REGION")!
+};
+
+builder.Services.AddInfrastructureDependencies(dbConfig, mailConfig, vnPayConfig, s3Config);
 
 builder.Services.AddApplicationDependencies();
 

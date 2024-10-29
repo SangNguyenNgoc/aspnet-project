@@ -51,4 +51,11 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
             .Where(m => m.Shows.Any(s => s.StartDate >= startDate && s.StartDate <= endDate))
             .ToListAsync();
     }
+
+    public async Task<string> Save(Domain.Movie.Entities.Movie movie)
+    {
+        var newMovie = await context.Movies.AddAsync(movie);
+        await context.SaveChangesAsync();
+        return newMovie.Entity.Id;
+    }
 }

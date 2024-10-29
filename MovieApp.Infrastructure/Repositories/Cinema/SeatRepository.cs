@@ -22,4 +22,10 @@ public class SeatRepository : ISeatRepository
             .ToListAsync();
         return seats;
     }
+
+    public async void SaveAll(List<Seat> seats)
+    {
+        await _context.Seats.AddRangeAsync(seats);
+        await _context.SaveChangesAsync();
+    }
 }

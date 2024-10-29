@@ -34,4 +34,23 @@ public class CinemaRepository : ICinemaRepository
                 ))
             .ToListAsync();
     }
+
+    public async Task<List<Domain.Cinema.Entities.Cinema>> GetCinemaAdmin()
+    {
+        return await _context.Cinemas
+            .Include(c => c.Location)
+            .ToListAsync();
+    }
+
+    public async Task<string> Save(Domain.Cinema.Entities.Cinema cinema)
+    {
+        var newCinema = await _context.Cinemas.AddAsync(cinema);
+        await _context.SaveChangesAsync();
+        return newCinema.Entity.Id;
+    }
+
+    public async Task<Domain.Cinema.Entities.Cinema?> GetById(string id)
+    {
+        return await _context.Cinemas.FindAsync(id);
+    }
 }
