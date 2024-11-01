@@ -6,7 +6,7 @@ public interface ICinemaService
 {
     Task<List<LocationAndCinema>> GetAllCinemas();
     Task<List<CinemaDetail>> GetCinemaAdmin();
-    Task<CinemaStatusResponse> GetAllStatus();
+    Task<List<CinemaStatusResponse>> GetAllStatus();
     Task<List<LocationResponse>> GetAllLocation();
     Task<string> SaveCinema(CinemaCreated cinemaRequest);
 };

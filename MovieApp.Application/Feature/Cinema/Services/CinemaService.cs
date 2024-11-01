@@ -92,9 +92,9 @@ public class CinemaService : ICinemaService
         return await _cinemaRepository.Save(cinema);
     }
 
-    public async Task<CinemaStatusResponse> GetAllStatus()
+    public async Task<List<CinemaStatusResponse>> GetAllStatus()
     {
-        return _mapper.Map<CinemaStatusResponse>(await _cinemaStatusRepository.GetAll());
+        return _mapper.Map<List<CinemaStatusResponse>>(await _cinemaStatusRepository.GetAll());
     }
 
     public async Task<List<LocationResponse>> GetAllLocation()
