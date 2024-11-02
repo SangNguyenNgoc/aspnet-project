@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MovieApp.Application.Exception;
+using MovieApp.Application.Feature.Cinema.Dtos;
 using MovieApp.Application.Feature.Movie.Dtos;
 using MovieApp.Application.Feature.Show.Dtos;
 using MovieApp.Domain.Cinema.Entities;
@@ -58,11 +59,11 @@ public class ShowtimeService : IShowtimeService
         var showtimeDetail = _mapper.Map<ShowtimeDetail>(show);
         showtimeDetail.Hall.Rows = show.Hall.Seats.GroupBy(s => s.RowName).Select(s =>
         {
-            var row = new ShowtimeDetail.HallDto.RowDto ();
+            var row = new HallResponse.RowDto ();
             row.RowName = s.Key;
             row.Seats = s.Select(seat =>
             {
-                var seatDto = _mapper.Map<ShowtimeDetail.HallDto.RowDto.SeatDto>(seat);
+                var seatDto = _mapper.Map<HallResponse.RowDto.SeatDto>(seat);
                 seatDto.isReserved = tickets.Exists(t => t.Seat.Id == seat.Id);
                 return seatDto;
             }).ToList();
@@ -77,7 +78,7 @@ public class ShowtimeService : IShowtimeService
         DateOnly date
     )
     {
-        var listMovie = await _movieRepository.GetAllMovies(date);
+        var listMovie = await _movieRepository.GetAllMoviesByDate(date);
         foreach (var movie in movies)
         {
             // Tìm phim trong danh sách
@@ -112,6 +113,8 @@ public class ShowtimeService : IShowtimeService
         var shows = new List<Domain.Show.Entities.Show>();
         var startDate = new DateTime(date, TimeOnly.Parse(_firstShowtime));
         var endDate = new DateTime(date, TimeOnly.Parse(_lastShowtime));
+        var allMovie = await _movieRepository.GetAll();
+        var allFormat = await _formatRepository.GetAll();
         while (true)
         {
             var allMovieWithZeroPriority = movies.All(movie => movie.Priority == 0);
@@ -139,8 +142,8 @@ public class ShowtimeService : IShowtimeService
 
             var newShow = new Domain.Show.Entities.Show
             {
-                Movie = await _movieRepository.GetMovieById(bestMovie.Id!),
-                Format = (await _formatRepository.GetById(bestMovie.FormatId))!,
+                Movie = allMovie.Find(m => m.Id == bestMovie.Id)!,
+                Format = allFormat.Find(f => f.Id == bestMovie.FormatId)!,
                 Hall = hall,
                 RunningTime = bestMovie.Duration,
                 StartDate = DateOnly.FromDateTime(startDate),

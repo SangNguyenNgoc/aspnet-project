@@ -18,6 +18,9 @@ public class Hall
 
     [Column("seats_per_row", TypeName = "int(11)")]
     public int SeatsPerRow { get; set; }
+    
+    [Column("total_seats", TypeName = "int(11)")]
+    public int TotalSeats { get; set; }
 
     [InverseProperty("Halls")] public required HallStatus Status { get; set; }
 

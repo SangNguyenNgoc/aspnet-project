@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MovieApp.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using MovieApp.Infrastructure.Context;
 namespace MovieApp.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241102063953_initHall")]
+    partial class initHall
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -366,7 +369,7 @@ namespace MovieApp.Infrastructure.Migrations
 
                     b.Property<int>("TotalSeats")
                         .HasColumnType("int(11)")
-                        .HasColumnName("total_seats");
+                        .HasColumnName("total_seat");
 
                     b.Property<string>("cinema_id")
                         .HasColumnType("varchar(50)");

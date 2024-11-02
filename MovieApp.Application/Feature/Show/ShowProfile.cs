@@ -1,4 +1,5 @@
-﻿using MovieApp.Application.Feature.Show.Dtos;
+﻿using MovieApp.Application.Feature.Cinema.Dtos;
+using MovieApp.Application.Feature.Show.Dtos;
 using MovieApp.Domain.Cinema.Entities;
 
 namespace MovieApp.Application.Feature.Show;
@@ -14,11 +15,11 @@ public class ShowProfile : AutoMapper.Profile
 
         CreateMap<Domain.Movie.Entities.Movie, ShowtimeDetail.MovieDto>();
         
-        CreateMap<Hall, ShowtimeDetail.HallDto>()
+        CreateMap<Hall, HallResponse>()
             .ForMember(dest => dest.Cinema, opt => opt.MapFrom(src => src.Cinema))
             .ForMember(dest => dest.Rows, opt => opt.Ignore());
-        CreateMap<Domain.Cinema.Entities.Cinema, ShowtimeDetail.HallDto.CinemaDto>();
-        CreateMap<Seat, ShowtimeDetail.HallDto.RowDto.SeatDto>()
+        CreateMap<Domain.Cinema.Entities.Cinema, HallResponse.CinemaDto>();
+        CreateMap<Seat, HallResponse.RowDto.SeatDto>()
             .ForMember(dest => dest.SeatType, opt => opt.MapFrom(src => src.Type));
     }
 }

@@ -17,14 +17,14 @@ public class CinemaController : ControllerBase
         _hallService = hallService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetCinemas()
+    [HttpGet(template:"shows")]
+    public async Task<IActionResult> GetCinemasAndShows()
     {
         return Ok(await _cinemaService.GetAllCinemas());
     }
     
-    [HttpGet(template:"admin")]
-    public async Task<IActionResult> GetCinemasAdmin()
+    [HttpGet]
+    public async Task<IActionResult> GetCinemas()
     {
         return Ok(await _cinemaService.GetCinemaAdmin());
     }
@@ -57,5 +57,17 @@ public class CinemaController : ControllerBase
     public async Task<IActionResult> SaveHall(string cinemaId, [FromBody] HallCreated hallRequest)
     {
         return Ok(await _hallService.SaveHall(cinemaId, hallRequest));
+    }
+    
+    [HttpGet("{cinemaId}")]
+    public async Task<IActionResult> GetCinemaDetail(string cinemaId)
+    {
+        return Ok(await _cinemaService.GetCinemaDetail(cinemaId));
+    }
+    
+    [HttpGet("hall/{hallId}")]
+    public async Task<IActionResult> GetHallDetail(long hallId)
+    {
+        return Ok(await _hallService.GetHallById(hallId));
     }
 }

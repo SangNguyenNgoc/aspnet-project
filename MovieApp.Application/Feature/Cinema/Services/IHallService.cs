@@ -6,4 +6,5 @@ public interface IHallService
 {
     Task<long> SaveHall(string cinemaId, HallCreated hallRequest);
     Task<List<HallStatusResponse>> GetHallStatus();
+    Task<HallResponse> GetHallById(long hallId);
 }

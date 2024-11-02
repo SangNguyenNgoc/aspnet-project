@@ -6,4 +6,5 @@ public interface IHallRepository
 {
     Task<List<Hall>> GetHallsByDate(DateOnly date, string cinemaId);
     Task<long> Save(Hall hall);
+    Task<Hall?> GetHallById(long hallId);
 }

@@ -33,8 +33,15 @@ public class HallRepository : IHallRepository
     {
         var newHall = await _context.Halls.AddAsync(hall);
         await _context.SaveChangesAsync();
-        // await _context.Seats.AddRangeAsync(hall.Seats);
-        // await _context.SaveChangesAsync();
         return newHall.Entity.Id;
+    }
+    
+    public async Task<Hall?> GetHallById(long hallId)
+    {
+        return await _context.Halls
+            .Include(h => h.Seats)
+            .ThenInclude(s => s.Type)
+            .Include(h => h.Cinema)
+            .FirstOrDefaultAsync(h => h.Id == hallId);
     }
 }

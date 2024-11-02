@@ -53,4 +53,14 @@ public class CinemaRepository : ICinemaRepository
     {
         return await _context.Cinemas.FindAsync(id);
     }
+    
+    public async Task<Domain.Cinema.Entities.Cinema?> GetDetailById(string id)
+    {
+        return await _context.Cinemas
+            .Include(c => c.Halls)
+            .ThenInclude(h => h.Status)
+            .Include(c => c.Location)
+            .Include(c => c.Status)
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
 }
