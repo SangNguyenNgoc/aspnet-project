@@ -22,7 +22,9 @@ public class MovieProfile : Profile
 
         CreateMap<Domain.Movie.Entities.Movie, MovieDetail>()
             .ForMember(dest => dest.Cinemas, otp => otp.Ignore())
-            .ForMember(dest => dest.Status, otp => otp.MapFrom(scr => scr.Status));
+            .ForMember(dest => dest.Status, otp => otp.MapFrom(scr => scr.Status))
+            .ForMember(dest => dest.Formats, otp => otp.MapFrom(scr => scr.Formats))
+            .ForMember(dest => dest.Genres, otp => otp.MapFrom(scr => scr.Genres));
 
         CreateMap<MovieStatus, MovieDetail.MovieStatusDto>();
 
@@ -40,6 +42,9 @@ public class MovieProfile : Profile
             .ForMember(dest => dest.Status, opt => opt.Ignore())
             .ForMember(dest => dest.Formats, opt => opt.Ignore())
             .ForMember(dest => dest.Genres, opt => opt.Ignore());
-            
+
+        CreateMap<Domain.Movie.Entities.Movie, ManageMovie>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+
     }
 }

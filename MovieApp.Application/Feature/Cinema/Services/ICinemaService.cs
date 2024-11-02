@@ -9,4 +9,5 @@ public interface ICinemaService
     Task<List<CinemaStatusResponse>> GetAllStatus();
     Task<List<LocationResponse>> GetAllLocation();
     Task<string> SaveCinema(CinemaCreated cinemaRequest);
+    Task<CinemaDetailManage> GetCinemaDetail(string id);
 };

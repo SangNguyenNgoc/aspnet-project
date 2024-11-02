@@ -12,7 +12,7 @@ public class ShowtimeDetail
     public bool Status { get; set; }
     public FormatResponse Format { get; set; }
     public MovieDto Movie { get; set; }
-    public HallDto Hall { get; set; }
+    public HallResponse Hall { get; set; }
     
     public class MovieDto
     {
@@ -27,38 +27,4 @@ public class ShowtimeDetail
         public int AgeRestriction { get; set; }
     }
     
-    public class HallDto
-    {
-        public long Id { get; set; }
-        public String Name { get; set; }
-        public int TotalSeats { get; set; }
-        public int AvailableSeats { get; set; }
-        public List<RowDto> Rows { get; set; }
-        public CinemaDto Cinema { get; set; }
-        
-        public class CinemaDto
-        {
-            public string Id { get; set; }
-            public string Name { get; set; }
-        }
-        
-        public class RowDto
-        {
-            public string RowName { get; set; }
-            public List<SeatDto> Seats { get; set; }
-            
-            public class SeatDto
-            {
-                public long Id { get; set; }
-                public bool Status { get; set; }
-                public int RowIndex { get; set; }
-                // public string RowName { get; set; }
-                public int Order { get; set; }
-                public bool isReserved { get; set; }
-                public SeatTypeResponse SeatType { get; set; }
-            }
-        }
-        
-        
-    }
 }

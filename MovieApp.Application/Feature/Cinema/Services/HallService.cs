@@ -32,6 +32,7 @@ public class HallService : IHallService
         if(hallRequest.Seats.Any(s => !type.Exists(t => t.Id == s.Type)))
             throw new DataNotFoundException("Seat type not found");
         var hall = _mapper.Map<Domain.Cinema.Entities.Hall>(hallRequest);
+        hall.TotalSeats = hallRequest.Seats.Count;
         hall.Cinema = cinema;
         hall.Status = status;
         hall.Seats = hallRequest.Seats.Select(s =>
@@ -47,6 +48,23 @@ public class HallService : IHallService
     {
         var hallStatus = await _hallStatusRepository.GetAllHallStatus();
         return _mapper.Map<List<HallStatusResponse>>(hallStatus);
+    }
+    
+    public async Task<HallResponse> GetHallById(long hallId)
+    {
+        var hall = await _hallRepository.GetHallById(hallId) ??
+                   throw new DataNotFoundException($"Hall with id {hallId} not found");
+        var hallMapper = _mapper.Map<HallResponse>(hall);
+        hallMapper.Rows = hall.Seats.GroupBy(s => s.RowName).Select(s =>
+        {
+            var row = new HallResponse.RowDto 
+            {
+                RowName = s.Key,
+                Seats = _mapper.Map<List<HallResponse.RowDto.SeatDto>>(s)
+            };
+            return row;
+        }).ToList();
+        return hallMapper;
     }
     
 }

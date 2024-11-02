@@ -31,7 +31,7 @@ public class CinemaService : ICinemaService
     {
         var result = new List<LocationAndCinema>();
         var locations = await _locationRepository.GetAllLocationAndCinema();
-        var movies = await _movieRepository.GetMovieAndShowByCinemaId();
+        var movies = await _movieRepository.GetMovieAndShowFor7Date();
 
         foreach (var location in locations.Select(l => _mapper.Map<LocationAndCinema>(l)))
         {
@@ -100,6 +100,13 @@ public class CinemaService : ICinemaService
     public async Task<List<LocationResponse>> GetAllLocation()
     {
         return _mapper.Map<List<LocationResponse>>(await _locationRepository.GetAllLocationAndCinema());
+    }
+    
+    public async Task<CinemaDetailManage> GetCinemaDetail(string id)
+    {
+        var cinema = await _cinemaRepository.GetDetailById(id) ??
+                     throw new DataNotFoundException($"Cinema with id {id} not found");
+        return _mapper.Map<CinemaDetailManage>(cinema);
     }
 
 }

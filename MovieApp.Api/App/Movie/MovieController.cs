@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieApp.Application.Feature.Movie.Dtos;
 using MovieApp.Application.Feature.Movie.Services;
 
@@ -49,5 +50,18 @@ public class MovieController : ControllerBase
     public async Task<IActionResult> GetAllStatus()
     {
         return Ok(await _movieService.GetAllStatus());
+    }
+    
+    [HttpGet]
+    // [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllMovies()
+    {
+        return Ok(await _movieService.GetAllMovies());
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetMovieById(string id)
+    {
+        return Ok(await _movieService.GetMovieById(id));
     }
 }

@@ -139,9 +139,22 @@ public class MovieService : IMovieService
         return await _movieRepository.Save(newMovie);
     }
     
-    public async Task<StatusResponse> GetAllStatus()
+    public async Task<List<StatusResponse>> GetAllStatus()
     {
         var status = await _movieStatusRepository.GetAll();
-        return _mapper.Map<StatusResponse>(status);
+        return _mapper.Map<List<StatusResponse>>(status);
+    }
+    
+    public async Task<List<ManageMovie>> GetAllMovies()
+    {
+        var movies = await _movieRepository.GetAll();
+        return _mapper.Map<List<ManageMovie>>(movies);
+    }
+    
+    public async Task<MovieDetail> GetMovieById(string id)
+    {
+        var movie = await _movieRepository.GetMovieById(id) ??
+                    throw new DataNotFoundException($"Movie {id} not found");
+        return _mapper.Map<MovieDetail>(movie);
     }
 }

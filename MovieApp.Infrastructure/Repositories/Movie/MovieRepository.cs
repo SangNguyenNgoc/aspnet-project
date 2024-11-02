@@ -6,12 +6,16 @@ namespace MovieApp.Infrastructure.Repositories.Movie;
 
 public class MovieRepository(MyDbContext context) : IMovieRepository
 {
-    public async Task<Domain.Movie.Entities.Movie> GetMovieById(string id)
+    public async Task<Domain.Movie.Entities.Movie?> GetMovieById(string id)
     {
-        return (await context.Movies.FindAsync(id))!;
+        return await context.Movies
+            .Include(m => m.Formats)
+            .Include(m => m.Genres)
+            .Include(m => m.Status)
+            .SingleOrDefaultAsync(m => m.Id == id);
     }
 
-    public async Task<List<Domain.Movie.Entities.Movie>> GetAllMovies(DateOnly date)
+    public async Task<List<Domain.Movie.Entities.Movie>> GetAllMoviesByDate(DateOnly date)
     {
         // Truy vấn tất cả các bộ phim có ngày phát hành trước 'date' và ngày kết thúc sau 'date'
         return await context.Movies
@@ -39,7 +43,7 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
             .ToListAsync();
     }
     
-    public async Task<List<Domain.Movie.Entities.Movie>> GetMovieAndShowByCinemaId()
+    public async Task<List<Domain.Movie.Entities.Movie>> GetMovieAndShowFor7Date()
     {
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         var endDate = startDate.AddDays(7);
@@ -58,5 +62,12 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
         var newMovie = await context.Movies.AddAsync(movie);
         await context.SaveChangesAsync();
         return newMovie.Entity.Id;
+    }
+
+    public Task<List<Domain.Movie.Entities.Movie>> GetAll()
+    {
+        return context.Movies
+            .Include(m => m.Status)
+            .ToListAsync();
     }
 }
