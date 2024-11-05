@@ -43,7 +43,7 @@ public class BillDetail
     
     public class UserDtoInBillDetail
     {
-        public required string Fullname;
+        public required string? Fullname;
         public required string Email;
     }
     

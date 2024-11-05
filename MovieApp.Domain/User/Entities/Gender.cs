@@ -20,13 +20,13 @@ public class GenderUtil
         };
     }
 
-    public static Gender GetGenderNum(string genderDescription)
+    public static Gender GetGenderNum(int genderValue)
     {
-        return genderDescription switch
+        return genderValue switch
         {
-            "Nam" => Gender.Male,
-            "Nữ" => Gender.Female,
-            "Khác" => Gender.Unknown,
+            1 => Gender.Male,
+            2 => Gender.Female,
+            3 => Gender.Unknown,
             _ => throw new ArgumentException("Invalid gender description")
         };
     }
