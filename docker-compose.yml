@@ -6,6 +6,7 @@
       dockerfile: MovieApp.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - TZ: Asia/Ho_Chi_Minh
     ports:
       - "5295:8080"
     env_file:

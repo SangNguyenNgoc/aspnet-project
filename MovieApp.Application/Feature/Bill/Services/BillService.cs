@@ -170,6 +170,14 @@ public class BillService : IBillService
                 Poster = ticket.Show.Movie.Poster,
                 HorizontalPoster = ticket.Show.Movie.HorizontalPoster
             };
+            
+            billInfo.Cinema = new BillInfo.CinemaDtoInBillInfo()
+            {
+                Id = ticket.Show.Hall.Cinema.Id,
+                Name = ticket.Show.Hall.Cinema.Name,
+                HallName = ticket.Show.Hall.Name
+            };
+            
             return billInfo;
         }).ToList();
         
@@ -220,7 +228,15 @@ public class BillService : IBillService
             Name = ticketDetail.Show.Movie.Name,
             SubName = ticketDetail.Show.Movie.SubName,
             Poster = ticketDetail.Show.Movie.Poster,
+            AgeRestriction = ticketDetail.Show.Movie.AgeRestriction,
             HorizontalPoster = ticketDetail.Show.Movie.HorizontalPoster
+        };
+
+        billDetail.Cinema = new BillDetail.CinemaDtoInBillDetail
+        {
+            Id = ticketDetail.Show.Hall.Cinema.Id,
+            Name = ticketDetail.Show.Hall.Cinema.Name,
+            HallName = ticketDetail.Show.Hall.Name
         };
 
         return billDetail;

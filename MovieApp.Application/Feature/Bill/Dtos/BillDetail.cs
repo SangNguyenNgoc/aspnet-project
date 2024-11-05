@@ -16,6 +16,7 @@ public class BillDetail
     public required MovieDtoInBillDetail Movie { get; set; }
     public required ICollection<TicketDtoInBillDetail> Tickets { get; set; } 
     public required UserDtoInBillDetail Customer { get; set; }
+    public required CinemaDtoInBillDetail Cinema { get; set; }
     
     public class ShowDtoInBillDetail
     {
@@ -23,7 +24,7 @@ public class BillDetail
         public int RunningTime { get; set; }
         public DateOnly StartDate { get; set; }
         public TimeOnly StartTime { get; set; }
-        public string Format { get; set; }
+        public required string Format { get; set; }
     }
 
     public class MovieDtoInBillDetail
@@ -32,6 +33,7 @@ public class BillDetail
         public string Name { get; set; } = null!;
         public string SubName { get; set; } = null!;
         public string Poster { get; set; } = null!;
+        public int AgeRestriction { get; set; }
         public string HorizontalPoster { get; set; } = null!;
     }
 
@@ -43,9 +45,15 @@ public class BillDetail
     
     public class UserDtoInBillDetail
     {
-        public required string? Fullname;
-        public required string Email;
+        public required string? Fullname { get; set; }
+        public required string Email { get; set; }
+    }
+
+    public class CinemaDtoInBillDetail
+    {
+        public required string Id { get; set; }
+        public required string Name { get; set; }
+        public required string HallName { get; set; }
     }
     
 }
-
