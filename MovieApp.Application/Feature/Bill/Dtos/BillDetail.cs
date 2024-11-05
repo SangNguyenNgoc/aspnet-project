@@ -2,15 +2,14 @@
 
 public class BillDetail
 {
-    public string Id { get; set; } = DateTime.Now.Ticks.ToString();
-
-    public DateTime CreateAt { get; set; }
-    public DateTime ExpireAt { get; set; }
+    public required string Id { get; set; }
+    public required DateTime CreateAt { get; set; }
+    public required DateTime ExpireAt { get; set; }
     public string? FailureReason { get; set; } = string.Empty;
     public DateTime? PaymentAt { get; set; }
     public DateTime? FailureAt { get; set; }
     public required string PaymentUrl { get; set; }
-    public long Total { get; set; }
+    public required long Total { get; set; }
     public required BillStatusDto Status { get; set; }
     public required ShowDtoInBillDetail Show { get; set; }
     public required MovieDtoInBillDetail Movie { get; set; }
@@ -21,26 +20,28 @@ public class BillDetail
     public class ShowDtoInBillDetail
     {
         public required string Id { get; set; }
-        public int RunningTime { get; set; }
-        public DateOnly StartDate { get; set; }
-        public TimeOnly StartTime { get; set; }
+        public required int RunningTime { get; set; }
+        public required DateOnly StartDate { get; set; }
+        public required TimeOnly StartTime { get; set; }
         public required string Format { get; set; }
     }
 
     public class MovieDtoInBillDetail
     {
         public required string Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string SubName { get; set; } = null!;
-        public string Poster { get; set; } = null!;
-        public int AgeRestriction { get; set; }
-        public string HorizontalPoster { get; set; } = null!;
+        public required string Name { get; set; }
+        public required string SubName { get; set; } 
+        public required string Poster { get; set; } 
+        public required int AgeRestriction { get; set; }
+        public required string HorizontalPoster { get; set; } 
     }
 
     public class TicketDtoInBillDetail
     {
         public required string Id { get; set; }
         public required string SeatName { get; set; }
+        public required string Type { get; set; }
+        public required long Price { get; set; }
     }
     
     public class UserDtoInBillDetail

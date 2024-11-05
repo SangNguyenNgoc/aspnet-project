@@ -49,6 +49,7 @@ public class BillRepository : IBillRepository
             .Include(b => b.User)
             .Include(b => b.Tickets)
                 .ThenInclude(t => t.Seat)
+                .ThenInclude(s => s.Type)
             .FirstOrDefaultAsync();
     }
 

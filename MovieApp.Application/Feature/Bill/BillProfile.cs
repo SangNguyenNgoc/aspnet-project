@@ -19,7 +19,9 @@ public class BillProfile : Profile
                 opt => opt.MapFrom(src => src.Tickets.Select(ticket => new BillDetail.TicketDtoInBillDetail
                     {
                         Id = ticket.Id,
-                        SeatName = ticket.Seat.RowName + ticket.Seat.RowIndex
+                        SeatName = ticket.Seat.RowName + ticket.Seat.RowIndex,
+                        Type = ticket.Seat.Type.Name,
+                        Price = ticket.Seat.Type.Price
                     })
                     .OrderBy(ticketDto => ticketDto.SeatName) 
                     .ToList()
