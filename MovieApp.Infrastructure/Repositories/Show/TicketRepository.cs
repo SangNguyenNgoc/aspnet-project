@@ -34,6 +34,11 @@ public class TicketRepository : ITicketRepository
                 .ThenInclude(s => s.Movie)
             .Include(t => t.Show)
                 .ThenInclude(s => s.Format)
+            .Include(t => t.Show) 
+                .ThenInclude(s => s.Hall)
+            .Include(t => t.Show) 
+                .ThenInclude(s => s.Hall)
+                .ThenInclude(h => h.Cinema)
             .FirstOrDefaultAsync(t => t.Id == ticketId);
     }
 
@@ -45,6 +50,11 @@ public class TicketRepository : ITicketRepository
                 .ThenInclude(show => show.Movie)
             .Include(ticket => ticket.Show)
                 .ThenInclude(show => show.Format)
+            .Include(t => t.Show) 
+                .ThenInclude(s => s.Hall)
+            .Include(t => t.Show) 
+                .ThenInclude(s => s.Hall)
+                .ThenInclude(h => h.Cinema)
             .GroupBy(ticket => ticket.Bill.Id)
             .ToDictionaryAsync(
                 group => group.Key,             

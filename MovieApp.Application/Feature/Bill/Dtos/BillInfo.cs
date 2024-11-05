@@ -3,7 +3,6 @@
 public class BillInfo
 {
     public string Id { get; set; } = DateTime.Now.Ticks.ToString();
-
     public DateTime CreateAt { get; set; }
     public DateTime ExpireAt { get; set; }
     public string? FailureReason { get; set; } = string.Empty;
@@ -14,6 +13,7 @@ public class BillInfo
     public required BillStatusDto Status { get; set; }
     public required ShowDtoInBillInfo Show { get; set; }
     public required MovieDtoInBillInfo Movie { get; set; }
+    public required CinemaDtoInBillInfo Cinema { get; set; }
     
     public class ShowDtoInBillInfo
     {
@@ -21,7 +21,7 @@ public class BillInfo
         public int RunningTime { get; set; }
         public DateOnly StartDate { get; set; }
         public TimeOnly StartTime { get; set; }
-        public string Format { get; set; }
+        public required string Format { get; set; }
     }
 
     public class MovieDtoInBillInfo
@@ -31,6 +31,14 @@ public class BillInfo
         public string SubName { get; set; } = null!;
         public string Poster { get; set; } = null!;
         public string HorizontalPoster { get; set; } = null!;
+    }
+    
+    
+    public class CinemaDtoInBillInfo
+    {
+        public required string Id { get; set; }
+        public required string Name { get; set; }
+        public required string HallName { get; set; }
     }
 }
 
