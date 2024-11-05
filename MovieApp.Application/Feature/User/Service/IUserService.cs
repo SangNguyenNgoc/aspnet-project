@@ -7,7 +7,7 @@ public interface IUserService
     public Task<List<UserInfo>> GetAllUsers();
     public Task<UserInfo> GetUserById(string userId);
     public Task<UserInfo> GetMyProfile(string token);
-    public Task<bool> UpdateUser(string userId, UserUpdateRequest userUpdate);
+    public Task<UserInfo> UpdateUser(string userId, UserUpdateRequest userUpdate);
 
     public Task<bool> ChangeEmail(string userId, string newEmail);
 
@@ -19,5 +19,5 @@ public interface IUserService
 
     public Task<bool> UpdateStatus(string userId, int status);
 
-    public Task<bool> ChangePassword(string userId, string oldPassword, string newPassword, string confirmPassword);
+    public Task<bool> ChangePassword(string userId, ChangePasswordRequest request);
 }

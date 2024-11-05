@@ -1,4 +1,6 @@
-using System.Security.Claims;
+using System.Data;
+using Microsoft.AspNetCore.Identity;
+using MovieApp.Application.Exception;
 using MovieApp.Application.Feature.User.Dtos;
 using MovieApp.Domain.User.Entities;
 using MovieApp.Domain.User.Repositories;
@@ -6,19 +8,26 @@ using MovieApp.Infrastructure.Mail;
 
 namespace MovieApp.Application.Feature.User.Service;
 
-public class UserService : IUserService{
-    private readonly IUserRepository _userRepository;
+public class UserService : IUserService
+{
     private readonly EmailService _emailService;
+    private readonly IUserRepository _userRepository;
+    private readonly UserManager<Domain.User.Entities.User> _userManager;
 
-    public UserService(IUserRepository userRepository, EmailService emailService){
+    public UserService(IUserRepository userRepository, EmailService emailService, 
+        UserManager<Domain.User.Entities.User> userManager)
+    {
         _userRepository = userRepository;
         _emailService = emailService;
+        _userManager = userManager;
     }
 
     //get all users
-    public async Task<List<UserInfo>> GetAllUsers(){
+    public async Task<List<UserInfo>> GetAllUsers()
+    {
         var users = await _userRepository.GetAllUsers();
-        return users.Select(user => new UserInfo{
+        return users.Select(user => new UserInfo
+        {
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
             Avatar = user.Avatar,
@@ -29,12 +38,12 @@ public class UserService : IUserService{
     }
 
     //get user by id
-    public async Task<UserInfo> GetUserById(string userId){
-        var user = await _userRepository.GetUserById(userId);
-        if (user == null){
-            return null;
-        }
-        return new UserInfo{
+    public async Task<UserInfo> GetUserById(string userId)
+    {
+        var user = await _userRepository.GetUserById(userId)
+            ?? throw new DataNotFoundException("User not found");
+        return new UserInfo
+        {
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
             Avatar = user.Avatar,
@@ -45,13 +54,12 @@ public class UserService : IUserService{
     }
 
     //get my profile
-    public async Task<UserInfo> GetMyProfile(string userId){
-        
-        if (string.IsNullOrEmpty(userId)){
-            return null;
-        }
-        var user = await _userRepository.GetUserById(userId);
-        return new UserInfo{
+    public async Task<UserInfo> GetMyProfile(string userId)
+    {
+        var user = await _userRepository.GetUserById(userId)
+            ?? throw new DataNotFoundException("User not found");
+        return new UserInfo
+        {
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
             Avatar = user.Avatar,
@@ -62,18 +70,112 @@ public class UserService : IUserService{
     }
 
     //update user
-    public async Task<bool> UpdateUser(string userId, UserUpdateRequest userUpdate){
-        if (string.IsNullOrEmpty(userId)){
-            return false;
-        }
-        var userEntity = new MovieApp.Domain.User.Entities.User
+    public async Task<UserInfo> UpdateUser(string userId, UserUpdateRequest userUpdate)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new DataNotFoundException("User not found");
+        };
+        var userEntity = new Domain.User.Entities.User
         {
             PhoneNumber = userUpdate.PhoneNumber,
             DateOfBirth = userUpdate.DateOfBirth,
             FullName = userUpdate.FullName,
             Gender = GenderUtil.GetGenderNum(userUpdate.Gender)
         };
-        var result = await _userRepository.UpdateUser(userId, userEntity);
+        var result = await _userRepository.UpdateUser(userId, userEntity)
+            ?? throw new DataNotFoundException("User not found");
+        return new UserInfo
+        {
+            Email = result.Email,
+            PhoneNumber = result.PhoneNumber,
+            Avatar = result.Avatar,
+            DateOfBirth = result.DateOfBirth,
+            FullName = result.FullName,
+            Gender = GenderUtil.GetGenderDescription(result.Gender)
+        };
+    }
+
+    public async Task<bool> ChangeEmail(string userId, string newEmail)
+    {
+        // Generate a confirmation token (this is a simple example, you might want to use a more secure method)
+        var token = Guid.NewGuid().ToString();
+        var user = await _userRepository.ChangeEmail(userId, newEmail, token);
+        if (!user)
+        {
+            throw new DataNotFoundException("Data not found");
+        }
+        // Send the confirmation email (this is a placeholder, replace with actual email sending logic)
+        await SendConfirmationEmail(newEmail, token);
+        return true;
+    }
+
+    //confirm email
+    public async Task<bool> ConfirmEmailChange(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            throw new BadRequestException("Request(token) is invalid");
+        }
+        var result = await _userRepository.ConfirmEmailChange(token);
+        if (!result)
+        {
+            throw new DataNotFoundException("User not found");
+        }
+        return true;
+    }
+
+    public async Task<bool> SendForgotPassword(string email)
+    {
+        // Generate a confirmation token (this is a simple example, you might want to use a more secure method)
+        var token = Guid.NewGuid().ToString();
+        var user = await _userRepository.SendForgotPassword(email, token);
+        if (!user) throw new DataNotFoundException("User not found.");
+        await SendEmailForgotPassword(email, token);
+        return true;
+    }
+
+    //Forgot password
+    public async Task<bool> ForgotPassword(string token, string newPassword, string confirmPassword)
+    {
+        if (string.IsNullOrEmpty(token)) throw new BadRequestException("Token is invalid or expired.");
+        if (newPassword != confirmPassword)
+        {
+            throw new BadRequestException("New password and confirm password do not match.");
+        }
+        var result = await _userRepository.ForgotPassword(token, newPassword, confirmPassword);
+        if (!result)
+        {
+            throw new DataException("User not found."); 
+        }
+        return true;
+    }
+
+    //update status
+    public async Task<bool> UpdateStatus(string userId, int status)
+    {
+        await _userRepository.UpdateStatus(userId, status);
+        return true;
+    }
+
+    //change password
+    public async Task<bool> ChangePassword(string userId, ChangePasswordRequest request)
+    {
+        var user = await _userRepository.GetUserById(userId) 
+            ?? throw new DataNotFoundException("User not found");
+        if (!await _userManager.CheckPasswordAsync(user, request.OldPassword))
+        {
+            throw new DataNotFoundException("User not found");
+        }
+        if (request.OldPassword == request.NewPassword)
+        {
+            throw new BadRequestException("Old password and new password are same.");
+        }
+        if (request.NewPassword != request.ConfirmPassword)
+        {
+            throw new BadRequestException("Password and confirm password do not match.");
+        }
+        await _userRepository.ChangePassword(userId, request.OldPassword, request.NewPassword);
         return true;
     }
 
@@ -83,33 +185,8 @@ public class UserService : IUserService{
         // Implement your email sending logic here
         // For example, you can use an email service to send the email with the confirmation link
         var confirmationLink = $"http://localhost:5295/api/v1/user/confirm-email?token={token}";
-        await _emailService.SendEmailAsync(email, "Confirm your new email", $"Please confirm your new email by clicking the following link: {confirmationLink}");
-    }
-    public async Task<bool> ChangeEmail(string userId, string newEmail){
-        if (string.IsNullOrEmpty(userId)){
-            return false;
-        }
-        if (string.IsNullOrEmpty(newEmail)){
-            return false;
-        }
-        // Generate a confirmation token (this is a simple example, you might want to use a more secure method)
-        var token = Guid.NewGuid().ToString();
-        var user = await _userRepository.ChangeEmail(userId, newEmail, token);
-        if (!user){
-            return false;
-        }
-        // Send the confirmation email (this is a placeholder, replace with actual email sending logic)
-        await SendConfirmationEmail(newEmail, token);
-        return true;
-    }
-
-    //confirm email
-    public async Task<bool> ConfirmEmailChange(string token){
-        if (string.IsNullOrEmpty(token)){
-            return false;
-        }
-        var user = await _userRepository.ConfirmEmailChange(token);
-        return true;
+        await _emailService.SendEmailAsync(email, "Confirm your new email",
+            $"Please confirm your new email by clicking the following link: {confirmationLink}");
     }
 
     //send change password
@@ -118,53 +195,7 @@ public class UserService : IUserService{
         // Implement your email sending logic here
         // For example, you can use an email service to send the email with the confirmation link
         var confirmationLink = $"http://localhost:5295/api/v1/user/forgot-password?token={token}";
-        await _emailService.SendEmailAsync(email, "Confirm your change password", $"Please confirm your new email by clicking the following link: {confirmationLink}");
-    }
-    public async Task<bool> SendForgotPassword(string email){
-        if (string.IsNullOrEmpty(email)){
-            return false;
-        }
-        // Generate a confirmation token (this is a simple example, you might want to use a more secure method)
-        var token = Guid.NewGuid().ToString();
-        var user = await _userRepository.SendForgotPassword(email, token);
-        if (!user){
-            return false;
-        }
-        await SendEmailForgotPassword(email, token);
-        return true;
-    }
-
-    //Forgot password
-    public async Task<bool> ForgotPassword(string token, string newPassword, string confirmPassword){
-        if (string.IsNullOrEmpty(token)){
-            return false;
-        }
-        var user = await _userRepository.ForgotPassword(token, newPassword, confirmPassword);
-        return true;
-    }
-
-    //update status
-    public async Task<bool> UpdateStatus(string userId, int status){
-        if (string.IsNullOrEmpty(userId)){
-            return false;
-        }
-        var user = await _userRepository.UpdateStatus(userId, status);
-        return true;
-    }
-
-    //change password
-    public async Task<bool> ChangePassword(string userId, string oldPassword, string newPassword, string confirmPassword){
-        if (string.IsNullOrEmpty(userId)){
-            return false;
-        }
-        if (string.IsNullOrEmpty(oldPassword) || oldPassword == newPassword){
-            return false;
-        }
-        if (newPassword != confirmPassword){
-            return false;
-        }
-
-        var user = await _userRepository.ChangePassword(userId, oldPassword, newPassword);
-        return true;
+        await _emailService.SendEmailAsync(email, "Confirm your change password",
+            $"Please confirm your new email by clicking the following link: {confirmationLink}");
     }
 }

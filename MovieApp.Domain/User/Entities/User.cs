@@ -15,7 +15,7 @@ public class User : IdentityUser
 
     [Column("fullname")]
     [StringLength(100)]
-    public string FullName { get; set; } = null!;
+    public string? FullName { get; set; } = null!;
 
     [Column("gender", TypeName = "enum('Female','Male','Unknown')")]
     public Gender Gender { get; set; }

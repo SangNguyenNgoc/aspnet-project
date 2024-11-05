@@ -1,9 +1,10 @@
 namespace MovieApp.Domain.User.Repositories;
 
-public interface IUserRepository{
+public interface IUserRepository
+{
     public Task<List<Entities.User>> GetAllUsers();
     public Task<Entities.User?> GetUserById(string userId);
-    public Task<bool> UpdateUser(string userId, Entities.User userUpdate);
+    public Task<Entities.User?> UpdateUser(string userId, Entities.User userUpdate);
 
     public Task<bool> ChangeEmail(string userId, string newEmail, string token);
 

@@ -1,3 +1,4 @@
+using System.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MovieApp.Domain.User.Entities;
@@ -81,19 +82,19 @@ public class UserRepository : IUserRepository
     }
 
 
-    public async Task<bool> UpdateUser(string userId, Domain.User.Entities.User userInfo)
+    public async Task<Domain.User.Entities.User?> UpdateUser(string userId, Domain.User.Entities.User userInfo)
     {
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
         {
-            return false;
+            return null;
         }
         user.PhoneNumber = userInfo.PhoneNumber;
         user.DateOfBirth = userInfo.DateOfBirth;
         user.FullName = userInfo.FullName;
         user.Gender = userInfo.Gender;
         await _context.SaveChangesAsync();
-        return true;
+        return user;
     }
 
     
@@ -174,12 +175,6 @@ public class UserRepository : IUserRepository
         {
             return false;
         }
-
-        if (newPassword != confirmPassword)
-        {
-            return false;
-        }
-
         // Update the password
         user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, newPassword);
         // Clear the token
@@ -207,15 +202,7 @@ public class UserRepository : IUserRepository
     public async Task<bool> ChangePassword(string userId, string oldPassword, string newPassword)
     {
         var user = await _context.Users.FindAsync(userId);
-        if (user == null)
-        {
-            return false;
-        }
-        if (!await _userManager.CheckPasswordAsync(user, oldPassword))
-        {
-            return false;
-        }
-        var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+        await _userManager.ChangePasswordAsync(user!, oldPassword, newPassword);
         return true;
     }
 }
