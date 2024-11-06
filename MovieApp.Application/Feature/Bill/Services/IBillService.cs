@@ -17,7 +17,7 @@ public interface IBillService
 
     Task<string> Payment(string billId, string responseCode, string transactionStatus, string paymentAt);
 
-    Task<ICollection<BillInfo>> GetBillsByUser(string userId);
+    Task<ICollection<BillDetail>> GetBillsByUser(string userId);
 
     Task<BillDetail> GetBillDetailByUser(string billId, string userId);
     
