@@ -20,14 +20,14 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("all")]
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<List<UserInfo>> GetAllUsers()
     {
         return await _userService.GetAllUsers();
     }
 
     [HttpGet("profile")]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> MyProfile()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 

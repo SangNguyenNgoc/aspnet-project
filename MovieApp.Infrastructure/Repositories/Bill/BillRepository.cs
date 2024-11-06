@@ -38,6 +38,10 @@ public class BillRepository : IBillRepository
         return await _context.Bills
             .Where(b => b.User.Id == userId)
             .Include(b => b.Status)
+            .Include(b => b.User)
+            .Include(b => b.Tickets)
+            .ThenInclude(t => t.Seat)
+            .ThenInclude(s => s.Type)
             .ToListAsync();
     }
 

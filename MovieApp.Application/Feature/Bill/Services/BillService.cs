@@ -10,6 +10,7 @@ using MovieApp.Domain.Show.Entities;
 using MovieApp.Domain.Show.Repositories;
 using MovieApp.Domain.User.Repositories;
 using MovieApp.Infrastructure.VnPay;
+using Quartz.Util;
 
 namespace MovieApp.Application.Feature.Bill.Services;
 
@@ -142,45 +143,17 @@ public class BillService : IBillService
     }
 
     
-    public async Task<ICollection<BillInfo>> GetBillsByUser(string userId)
+    public async Task<ICollection<BillDetail>> GetBillsByUser(string userId)
     {
         var bills = await _billRepository.GetByUserIdAsync(userId);
-        var billsIds = bills.Select(bill => bill.Id).ToList();
-        var ticketPerBills = await _ticketRepository.GetAllTicketByBillIdGroupByBillId(billsIds);
+        var mapBillAndTicket =
+            await _ticketRepository.GetAllTicketByBillIdGroupByBillId(bills.Select(bill => bill.Id).ToList());
         var billDetails = bills.Select(bill =>
         {
-            var billInfo = _mapper.Map<BillInfo>(bill);
-            ticketPerBills.TryGetValue(bill.Id, out var ticket);
-            
-            if (ticket == null) return billInfo;
-            billInfo.Show = new BillInfo.ShowDtoInBillInfo
-            {
-                Id = ticket.Show.Id,
-                RunningTime = ticket.Show.RunningTime,
-                StartDate = ticket.Show.StartDate,
-                StartTime = ticket.Show.StartTime,
-                Format = ticket.Show.Format.Version + " " + ticket.Show.Format.Caption
-            };
-            
-            billInfo.Movie = new BillInfo.MovieDtoInBillInfo
-            {
-                Id = ticket.Show.Movie.Id,
-                Name = ticket.Show.Movie.Name,
-                SubName = ticket.Show.Movie.SubName,
-                Poster = ticket.Show.Movie.Poster,
-                HorizontalPoster = ticket.Show.Movie.HorizontalPoster
-            };
-            
-            billInfo.Cinema = new BillInfo.CinemaDtoInBillInfo()
-            {
-                Id = ticket.Show.Hall.Cinema.Id,
-                Name = ticket.Show.Hall.Cinema.Name,
-                HallName = ticket.Show.Hall.Name
-            };
-            
-            return billInfo;
+            mapBillAndTicket.TryGetValue(bill.Id, out var ticketDetail);
+            var billDetail = MapBillDetail(bill, ticketDetail!);
+            return billDetail;
         }).ToList();
-        
         return billDetails;
     }
 
@@ -194,18 +167,17 @@ public class BillService : IBillService
         {
             throw new UnauthorizedAccessException();
         }
-        var billDetail = await MapBillDetail(bill);
+        var ticketDetail = await _ticketRepository.GetTicketDetailById(bill.Tickets.First().Id)
+                           ?? throw new DataNotFoundException("Ticket not found");
+        var billDetail = MapBillDetail(bill, ticketDetail);
 
         return billDetail;
     }
 
     
-    private async Task<BillDetail> MapBillDetail(Domain.Bill.Entities.Bill bill)
+    private BillDetail MapBillDetail(Domain.Bill.Entities.Bill bill, Ticket ticketDetail)
     {
         var billDetail = _mapper.Map<BillDetail>(bill);
-    
-        var ticketDetail = await _ticketRepository.GetTicketDetailById(bill.Tickets.First().Id)
-                           ?? throw new DataNotFoundException("Ticket not found");
 
         billDetail.Customer = new BillDetail.UserDtoInBillDetail
         {

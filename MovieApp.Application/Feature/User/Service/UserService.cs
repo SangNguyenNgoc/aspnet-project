@@ -1,4 +1,5 @@
 using System.Data;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using MovieApp.Application.Exception;
 using MovieApp.Application.Feature.User.Dtos;
@@ -13,28 +14,22 @@ public class UserService : IUserService
     private readonly EmailService _emailService;
     private readonly IUserRepository _userRepository;
     private readonly UserManager<Domain.User.Entities.User> _userManager;
+    private readonly IMapper _mapper;
 
     public UserService(IUserRepository userRepository, EmailService emailService, 
-        UserManager<Domain.User.Entities.User> userManager)
+        UserManager<Domain.User.Entities.User> userManager, IMapper mapper)
     {
         _userRepository = userRepository;
         _emailService = emailService;
         _userManager = userManager;
+        _mapper = mapper;
     }
 
     //get all users
     public async Task<List<UserInfo>> GetAllUsers()
     {
         var users = await _userRepository.GetAllUsers();
-        return users.Select(user => new UserInfo
-        {
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            Avatar = user.Avatar,
-            DateOfBirth = user.DateOfBirth,
-            FullName = user.FullName,
-            Gender = GenderUtil.GetGenderDescription(user.Gender)
-        }).ToList();
+        return users.Select(user => _mapper.Map<UserInfo>(user)).ToList();
     }
 
     //get user by id
@@ -42,15 +37,7 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetUserById(userId)
             ?? throw new DataNotFoundException("User not found");
-        return new UserInfo
-        {
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            Avatar = user.Avatar,
-            DateOfBirth = user.DateOfBirth,
-            FullName = user.FullName,
-            Gender = GenderUtil.GetGenderDescription(user.Gender)
-        };
+        return _mapper.Map<UserInfo>(user);
     }
 
     //get my profile
@@ -58,15 +45,7 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetUserById(userId)
             ?? throw new DataNotFoundException("User not found");
-        return new UserInfo
-        {
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            Avatar = user.Avatar,
-            DateOfBirth = user.DateOfBirth,
-            FullName = user.FullName,
-            Gender = GenderUtil.GetGenderDescription(user.Gender)
-        };
+        return _mapper.Map<UserInfo>(user);;
     }
 
     //update user
@@ -85,15 +64,7 @@ public class UserService : IUserService
         };
         var result = await _userRepository.UpdateUser(userId, userEntity)
             ?? throw new DataNotFoundException("User not found");
-        return new UserInfo
-        {
-            Email = result.Email,
-            PhoneNumber = result.PhoneNumber,
-            Avatar = result.Avatar,
-            DateOfBirth = result.DateOfBirth,
-            FullName = result.FullName,
-            Gender = GenderUtil.GetGenderDescription(result.Gender)
-        };
+        return _mapper.Map<UserInfo>(result);
     }
 
     public async Task<bool> ChangeEmail(string userId, string newEmail)
