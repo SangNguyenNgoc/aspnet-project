@@ -136,7 +136,7 @@ public class UserService : IUserService
             ?? throw new DataNotFoundException("User not found");
         if (!await _userManager.CheckPasswordAsync(user, request.OldPassword))
         {
-            throw new DataNotFoundException("User not found");
+            throw new BadRequestException("Old password's incorrect.");
         }
         if (request.OldPassword == request.NewPassword)
         {
