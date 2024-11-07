@@ -12,6 +12,7 @@ public class MovieInfoLanding
     public string HorizontalPoster { get; set; }
     public string Slug { get; set; }
     public int AgeRestriction { get; set; }
+    public int RunningTime { get; set; }
     public List<FormatResponse> Formats { get; set; } = new();
     public List<GenreResponse> Genres { get; set; } = new();
 }
