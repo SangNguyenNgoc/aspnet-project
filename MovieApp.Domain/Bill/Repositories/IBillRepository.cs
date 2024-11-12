@@ -15,5 +15,7 @@ public interface IBillRepository
     Task<ICollection<Entities.Bill>> GetAllBillsAreExpired(DateTime dateTime);
     
     Task UpdateExpiredBillsStatus(DateTime dateTime);
+    
+    Task<List<Entities.Bill>?> GetBillByYear(int year);
 
 }

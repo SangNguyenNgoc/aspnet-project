@@ -63,4 +63,17 @@ public class CinemaRepository : ICinemaRepository
             .Include(c => c.Status)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
+
+    public async Task<List<Domain.Cinema.Entities.Cinema>> GetCinemaByYear(int year)
+    {
+        return await _context.Cinemas
+            .Include(c => c.Halls)
+            .ThenInclude(h => h.Shows
+                .Where(s => s.StartDate.Year == year)
+            )
+            .ThenInclude(s => s.Tickets)
+            .ThenInclude(t => t.Seat)
+            .ThenInclude(s => s.Type)
+            .ToListAsync();
+    }
 }

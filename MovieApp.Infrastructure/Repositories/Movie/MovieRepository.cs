@@ -70,4 +70,16 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
             .Include(m => m.Status)
             .ToListAsync();
     }
+
+    public async Task<List<Domain.Movie.Entities.Movie>?> GetMovieByYear(int year)
+    {
+        return await context.Movies
+            .Where(m => m.Shows.Any(s => s.StartDate.Year == year))
+            .Include(m => m.Shows
+                .Where(s => s.StartDate.Year == year))
+            .ThenInclude(s => s.Tickets)
+            .ThenInclude(t => t.Seat)
+            .ThenInclude(s => s.Type)
+            .ToListAsync();
+    }
 }

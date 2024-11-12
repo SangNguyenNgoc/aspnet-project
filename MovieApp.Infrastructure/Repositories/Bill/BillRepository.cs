@@ -70,4 +70,11 @@ public class BillRepository : IBillRepository
         await _context.Database.ExecuteSqlRawAsync(sql, new MySqlParameter("@dateTime", dateTime));
     }
 
+    public async Task<List<Domain.Bill.Entities.Bill>?> GetBillByYear(int year)
+    {
+        return await _context.Bills
+            .Where(b => b.CreateAt.Year == year && b.Status.Id == 2)
+            .Include(b => b.Tickets)
+            .ToListAsync();
+    }
 }

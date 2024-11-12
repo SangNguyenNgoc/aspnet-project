@@ -7,4 +7,5 @@ public interface ICinemaRepository
     Task<string> Save(Domain.Cinema.Entities.Cinema cinema);
     Task<Domain.Cinema.Entities.Cinema?> GetById(string id);
     Task<Domain.Cinema.Entities.Cinema?> GetDetailById(string id);
+    Task<List<Entities.Cinema>> GetCinemaByYear(int year);
 }
