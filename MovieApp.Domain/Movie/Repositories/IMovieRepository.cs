@@ -9,5 +9,6 @@ public interface IMovieRepository
     Task<List<Entities.Movie>> GetMovieAndShowFor7Date();
     Task<string> Save(Domain.Movie.Entities.Movie movie);
     Task<List<Entities.Movie>> GetAll();
+    Task<List<Entities.Movie>?> GetMovieByYear(int year);
     
 }

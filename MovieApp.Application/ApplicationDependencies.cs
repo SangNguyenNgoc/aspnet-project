@@ -2,6 +2,7 @@
 using MovieApp.Application.BackgroundTasks.UpdateBill;
 using MovieApp.Application.Feature.Bill.Services;
 using MovieApp.Application.Feature.Cinema.Services;
+using MovieApp.Application.Feature.Dashboard.Services;
 using MovieApp.Application.Feature.Movie;
 using MovieApp.Application.Feature.Movie.Services;
 using MovieApp.Application.Feature.Show.Services;
@@ -24,6 +25,7 @@ public static class ApplicationDependencies
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISeatTypeService, SeatTypeService>();
         services.AddScoped<IHallService, HallService>();
+        services.AddScoped<IDashboardService, DashboardService>();
 
         services.AddQuartz();
         services.AddQuartzHostedService(options =>
