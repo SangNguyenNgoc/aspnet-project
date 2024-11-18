@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Security.Claims;
 using AutoMapper;
 using MovieApp.Application.Exception;
 using MovieApp.Application.Feature.Bill.Dtos;
@@ -10,7 +9,6 @@ using MovieApp.Domain.Show.Entities;
 using MovieApp.Domain.Show.Repositories;
 using MovieApp.Domain.User.Repositories;
 using MovieApp.Infrastructure.VnPay;
-using Quartz.Util;
 
 namespace MovieApp.Application.Feature.Bill.Services;
 
@@ -68,7 +66,7 @@ public class BillService : IBillService
             User = user,
             Total = totalPrice,
             CreateAt = DateTime.Now,
-            ExpireAt = DateTime.Now.AddMinutes(_vnPayService.getTimeOut()),
+            ExpireAt = DateTime.Now.AddMinutes(_vnPayService.GetTimeOut()),
             PaymentUrl = paymentUrl,
             PaymentAt = null,
             FailureAt = null,
@@ -121,12 +119,14 @@ public class BillService : IBillService
             bill.Status = newStatus;
             bill.PaymentAt = dateTime;
             await _billRepository.UpdateAsync(bill);
-            return "Success";
         }
-        var message = _vnPayService.GetMessage(responseCode, transactionStatus);
-        bill.FailureReason = message;
-        bill.FailureAt = dateTime;
-        return message;
+        else
+        {
+            var message = _vnPayService.GetMessage(responseCode, transactionStatus);
+            bill.FailureReason = message;
+            bill.FailureAt = dateTime;
+        }
+        return _vnPayService.GetBillDetailUrl() + "?id=" + bill.Id;
     }
     
     

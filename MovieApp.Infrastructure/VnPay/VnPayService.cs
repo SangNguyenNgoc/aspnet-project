@@ -109,7 +109,7 @@ public class VnPayService
         return transactionStatus == "01" ? "Chưa thanh toán" : "Transaction Status invalid";
     }
 
-    private Dictionary<string, string> GetResponseCodeMessages()
+    private static Dictionary<string, string> GetResponseCodeMessages()
     {
         var responseCodeMessages = new Dictionary<string, string>
         {
@@ -124,13 +124,17 @@ public class VnPayService
             { "79", "KH nhập sai mật khẩu thanh toán quá số lần quy định. Xin quý khách vui lòng thực hiện lại giao dịch." },
             { "99", "Lỗi không xác định." }
         };
-
         return responseCodeMessages;
     }
 
-    public int getTimeOut()
+    public int GetTimeOut()
     {
         return _vnPayConfig.TimeOut;
+    }
+
+    public string GetBillDetailUrl()
+    {
+        return _vnPayConfig.BillDetailUrl;
     }
 
 }

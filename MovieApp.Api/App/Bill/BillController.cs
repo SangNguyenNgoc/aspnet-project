@@ -44,7 +44,7 @@ public class BillController : ControllerBase
         [FromQuery(Name = "vnp_SecureHash")] string secureHash)
     {
         var result = await _billService.Payment(txnRef, responseCode, transactionStatus, payDate);
-        return Ok(result);
+        return Redirect(result);
     }
 
     [HttpGet("curr-user")]

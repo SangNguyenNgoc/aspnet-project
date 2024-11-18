@@ -64,7 +64,9 @@ var vnPayConfig = new VnPayConfig
     VnpayUrl = Environment.GetEnvironmentVariable("VNPAY_URL")!,
     TmnCode = Environment.GetEnvironmentVariable("TMN_CODE")!,
     VnpayReturnUrl = Environment.GetEnvironmentVariable("VNPAY_RETURN_URL")!,
+    BillDetailUrl = Environment.GetEnvironmentVariable("BILL_DETAIL_URL")!, 
     TimeOut = int.Parse(Environment.GetEnvironmentVariable("VNPAY_TIMEOUT")!),
+
 };
 var dbConfig = new DbConfig
 {
