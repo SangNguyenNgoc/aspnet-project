@@ -12,8 +12,10 @@ public class HallService : IHallService
     private readonly IHallStatusRepository _hallStatusRepository;
     private readonly ICinemaRepository _cinemaRepository;
     private readonly ISeatTypeRepository _seatTypeRepository;
+    private readonly ISeatRepository _seatRepository;
 
-    public HallService(IMapper mapper, IHallRepository hallRepository, IHallStatusRepository hallStatusRepository, ICinemaRepository cinemaRepository, ISeatTypeRepository seatTypeRepository)
+    public HallService(IMapper mapper, IHallRepository hallRepository, IHallStatusRepository hallStatusRepository,
+        ICinemaRepository cinemaRepository, ISeatTypeRepository seatTypeRepository)
     {
         _mapper = mapper;
         _hallRepository = hallRepository;
@@ -21,15 +23,15 @@ public class HallService : IHallService
         _cinemaRepository = cinemaRepository;
         _seatTypeRepository = seatTypeRepository;
     }
-    
+
     public async Task<long> SaveHall(string cinemaId, HallCreated hallRequest)
     {
-        var cinema = await _cinemaRepository.GetById(cinemaId) ?? 
+        var cinema = await _cinemaRepository.GetById(cinemaId) ??
                      throw new DataNotFoundException($"Cinema with id {cinemaId} not found");
         var status = await _hallStatusRepository.GetById(hallRequest.Status) ??
                      throw new DataNotFoundException($"Status with id {hallRequest.Status} not found");
         var type = await _seatTypeRepository.GetAll();
-        if(hallRequest.Seats.Any(s => !type.Exists(t => t.Id == s.Type)))
+        if (hallRequest.Seats.Any(s => !type.Exists(t => t.Id == s.Type)))
             throw new DataNotFoundException("Seat type not found");
         var hall = _mapper.Map<Domain.Cinema.Entities.Hall>(hallRequest);
         hall.TotalSeats = hallRequest.Seats.Count;
@@ -43,13 +45,13 @@ public class HallService : IHallService
         }).ToList();
         return await _hallRepository.Save(hall);
     }
-    
+
     public async Task<List<HallStatusResponse>> GetHallStatus()
     {
         var hallStatus = await _hallStatusRepository.GetAllHallStatus();
         return _mapper.Map<List<HallStatusResponse>>(hallStatus);
     }
-    
+
     public async Task<HallResponse> GetHallById(long hallId)
     {
         var hall = await _hallRepository.GetHallById(hallId) ??
@@ -57,7 +59,7 @@ public class HallService : IHallService
         var hallMapper = _mapper.Map<HallResponse>(hall);
         hallMapper.Rows = hall.Seats.GroupBy(s => s.RowName).Select(s =>
         {
-            var row = new HallResponse.RowDto 
+            var row = new HallResponse.RowDto
             {
                 RowName = s.Key,
                 Seats = _mapper.Map<List<HallResponse.RowDto.SeatDto>>(s)
@@ -66,5 +68,23 @@ public class HallService : IHallService
         }).ToList();
         return hallMapper;
     }
-    
+
+    public async Task<HallResponse> UpdateHallStatus(long hallId, long statusId)
+    {
+        var hall = await _hallRepository.GetHallById(hallId) ??
+                   throw new DataNotFoundException($"Hall with id {hallId} not found");
+        var status = await _hallStatusRepository.GetById(statusId) ??
+                     throw new DataNotFoundException($"Status with id {statusId} not found");
+        hall.Status = status;
+        var hallUpdate = await _hallRepository.UpdateStatus(hall);
+        return _mapper.Map<HallResponse>(hallUpdate);
+    }
+
+    public async Task<string> UpdateSeatStatus(long seatId)
+    {
+        var seat = await _seatRepository.GetById(seatId) ?? 
+                   throw new DataNotFoundException($"Seat with id {seatId} not found");
+        var seatUpdate = await _seatRepository.UpdateStatus(seat);
+        return "success";
+    }
 }

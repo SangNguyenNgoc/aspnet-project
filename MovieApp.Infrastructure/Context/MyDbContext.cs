@@ -21,10 +21,10 @@ public class MyDbContext : IdentityDbContext<User>
     
     public DbSet<Location> Locations { get; set; }
     public DbSet<Cinema> Cinemas { get; set; }
-    public DbSet<CinemaStatus> CinemaStatus { get; set; }
+    public DbSet<CinemaStatus?> CinemaStatus { get; set; }
     public DbSet<Hall> Halls { get; set; }
     public DbSet<HallStatus> HallStatus { get; set; }
-    public DbSet<Seat> Seats { get; set; }
+    public DbSet<Seat?> Seats { get; set; }
     public DbSet<SeatType> SeatTypes { get; set; }
 
     public DbSet<Format> Formats { get; set; }

@@ -44,4 +44,11 @@ public class HallRepository : IHallRepository
             .Include(h => h.Cinema)
             .FirstOrDefaultAsync(h => h.Id == hallId);
     }
+
+    public async Task<Hall> UpdateStatus(Hall hall)
+    {
+        var hallUpdate = _context.Halls.Update(hall).Entity;
+        await _context.SaveChangesAsync();
+        return hallUpdate;
+    }
 }
