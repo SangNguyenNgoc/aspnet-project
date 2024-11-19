@@ -28,4 +28,17 @@ public class SeatRepository : ISeatRepository
         await _context.Seats.AddRangeAsync(seats);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Seat?> UpdateStatus(Seat? seat)
+    {
+        seat.Status = !seat.Status;
+        _context.Seats.Update(seat);
+        await _context.SaveChangesAsync();
+        return seat;
+    }
+
+    public async Task<Seat?> GetById(long seatId)
+    {
+        return await _context.Seats.FindAsync(seatId);
+    }
 }

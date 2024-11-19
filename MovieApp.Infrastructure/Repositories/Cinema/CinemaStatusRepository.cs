@@ -14,7 +14,7 @@ public class CinemaStatusRepository : ICinemaStatusRepository
         _context = context;
     }
     
-    public async Task<List<CinemaStatus>> GetAll()
+    public async Task<List<CinemaStatus?>> GetAll()
     {
         return await _context.CinemaStatus.ToListAsync();
     }
@@ -22,5 +22,10 @@ public class CinemaStatusRepository : ICinemaStatusRepository
     public async Task<CinemaStatus?> GetById(long id)
     {
         return await _context.CinemaStatus.FindAsync(id);
+    }
+    
+    public async Task<CinemaStatus?> GetDifferentId(long id)
+    {
+        return await _context.CinemaStatus.FirstOrDefaultAsync(c => c.Id != id);
     }
 }
