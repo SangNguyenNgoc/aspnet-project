@@ -4,6 +4,7 @@ namespace MovieApp.Domain.Cinema.Repositories;
 
 public interface ICinemaStatusRepository
 {
-    Task<List<CinemaStatus>> GetAll();
+    Task<List<CinemaStatus?>> GetAll();
     Task<CinemaStatus?> GetById(long id);
+    Task<CinemaStatus?> GetDifferentId(long id);
 }

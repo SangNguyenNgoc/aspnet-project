@@ -76,4 +76,11 @@ public class CinemaRepository : ICinemaRepository
             .ThenInclude(s => s.Type)
             .ToListAsync();
     }
+
+    public Task<Domain.Cinema.Entities.Cinema> UpdateStatus(Domain.Cinema.Entities.Cinema cinema)
+    {
+        _context.Cinemas.Update(cinema);
+        _context.SaveChanges();
+        return Task.FromResult(cinema);
+    }
 }

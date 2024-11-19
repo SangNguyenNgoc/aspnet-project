@@ -70,4 +70,22 @@ public class CinemaController : ControllerBase
     {
         return Ok(await _hallService.GetHallById(hallId));
     }
+    
+    [HttpPut("hall/{hallId}/status")]
+    public async Task<IActionResult> UpdateHallStatus(long hallId, [FromBody] HallStatusRequest statusRequest)
+    {
+        return Ok(await _hallService.UpdateHallStatus(hallId, statusRequest.StatusId));
+    }
+    
+    [HttpPut("{cinemaId}/status")]
+    public async Task<IActionResult> UpdateCinemaStatus(string cinemaId)
+    {
+        return Ok(await _cinemaService.UpdateCinemaStatus(cinemaId));
+    }
+    
+    [HttpPut("hall/seat/{seatId}")]
+    public async Task<IActionResult> UpdateSeatStatus(long seatId)
+    {
+        return Ok(await _hallService.UpdateSeatStatus(seatId));
+    }
 }

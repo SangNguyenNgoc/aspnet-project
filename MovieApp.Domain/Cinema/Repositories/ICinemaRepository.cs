@@ -8,4 +8,5 @@ public interface ICinemaRepository
     Task<Domain.Cinema.Entities.Cinema?> GetById(string id);
     Task<Domain.Cinema.Entities.Cinema?> GetDetailById(string id);
     Task<List<Entities.Cinema>> GetCinemaByYear(int year);
+    Task<Entities.Cinema> UpdateStatus(Entities.Cinema cinema);
 }
