@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Ganss.Xss;
 
 namespace MovieApp.Application.Feature.Movie.Services;
 
@@ -42,4 +43,22 @@ public class AppUtil
 
         return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
     }
+    
+    private static readonly List<string> AllowedTags = new() { "b", "i", "u", "p", "a", "div", "span", "h1", "h2", "h3", "h4", "strong", "ul", "li", "ol" };
+    
+    public static string SanitizeHtml(string inputHtml)
+    {
+        var sanitizer = new HtmlSanitizer();
+        sanitizer.AllowedTags.Clear();
+
+        // Thêm các thẻ được phép nếu cần
+        foreach (var item in AllowedTags)
+        {
+            sanitizer.AllowedTags.Add(item);
+        }
+
+        // Sanitize HTML
+        return sanitizer.Sanitize(inputHtml);
+    }
+    
 }

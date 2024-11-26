@@ -135,6 +135,7 @@ public class MovieService : IMovieService
         
         newMovie.Formats = formats.Where(f => movieCreateRequest.Formats.Contains(f.Id)).ToList();
         newMovie.Genres = genres.Where(g => movieCreateRequest.Genres.Contains(g.Id)).ToList();
+        newMovie.Description = AppUtil.SanitizeHtml(movieCreateRequest.Description);
         
         return await _movieRepository.Save(newMovie);
     }
