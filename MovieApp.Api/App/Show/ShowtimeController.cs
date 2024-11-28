@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieApp.Application.Feature.Show.Dtos;
 using MovieApp.Application.Feature.Show.Services;
 
@@ -16,6 +17,7 @@ public class ShowtimeController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateShowtimeRequest createShowtimeRequest)
     {
         await _showtimeService.Create(createShowtimeRequest);
