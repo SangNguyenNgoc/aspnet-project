@@ -50,7 +50,8 @@ public class AuthService : IAuthService
         if (!roleResult.Succeeded)
             throw new AppException("Register failure", roleResult.Errors.Select(e => e.Description).ToList(), 500);
         var response = _mapper.Map<AuthResponse>(newUser);
-        response.Token = await GenerateToken(newUser);
+        response.Token = await GenerateToken(newUser, null);
+        response.Roles = ["User"];
         return response;
     }
 
@@ -64,15 +65,15 @@ public class AuthService : IAuthService
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password!, false);
         if (!result.Succeeded) throw new BadRequestException("Invalid email or password");
         var response = _mapper.Map<AuthResponse>(user);
-        response.Token = await GenerateToken(user);
+        var roles = await _userManager.GetRolesAsync(user);
+        response.Token = await GenerateToken(user, roles);
+        response.Roles = roles;
         return response;
     }
 
-    public async Task<string> GenerateToken(User user)
-    {
-        var roles = await _userManager.GetRolesAsync(user);
-
-        // Tạo claims
+    public async Task<string> GenerateToken(User user, IList<string>? roles)
+    { // Tạo claims
+        roles ??= await _userManager.GetRolesAsync(user);
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id),

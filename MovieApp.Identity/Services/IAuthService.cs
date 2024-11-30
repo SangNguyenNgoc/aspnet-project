@@ -9,5 +9,5 @@ public interface IAuthService
 
     Task<AuthResponse> Login(LoginRequest request);
 
-    Task<string> GenerateToken(User user);
+    Task<string> GenerateToken(User user, IList<string> roles);
 }
