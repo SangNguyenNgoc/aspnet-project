@@ -82,4 +82,17 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
             .ThenInclude(s => s.Type)
             .ToListAsync();
     }
+
+    public async Task<Domain.Movie.Entities.Movie?> GetBestMovie(DateTime from, DateTime to)
+    {
+        var fromDate = DateOnly.FromDateTime(from);
+        var toDate = DateOnly.FromDateTime(to);
+        return await context.Movies
+            .Where(m => m.Shows.Any(s => s.StartDate >= fromDate && s.StartDate <= toDate))
+            .Include(m => m.Status)
+            .OrderByDescending(m => m.Shows
+                .Where(s => s.StartDate >= fromDate && s.StartDate <= toDate)
+                .Sum(s => s.Tickets.Sum(t => t.Seat.Type.Price)))
+            .FirstOrDefaultAsync();
+    }
 }

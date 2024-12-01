@@ -77,4 +77,13 @@ public class BillRepository : IBillRepository
             .Include(b => b.Tickets)
             .ToListAsync();
     }
+
+    public async Task<List<Domain.Bill.Entities.Bill>?> GetBillByTime(DateTime from, DateTime to)
+    {
+        return await _context.Bills
+            .Where(b => b.CreateAt >= from && b.CreateAt <= to && b.Status.Id == 2)
+            .Include(b => b.Tickets)
+            .ToListAsync();
+    }
+            
 }

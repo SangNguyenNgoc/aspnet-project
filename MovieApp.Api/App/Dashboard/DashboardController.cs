@@ -35,4 +35,11 @@ public class DashboardController : ControllerBase
     {
         return Ok(await _dashboardService.StatisticCinema(month, year));
     }
+    
+    [Authorize(Roles = "Admin")]
+    [HttpGet("time")]
+    public async Task<IActionResult> GetStatisticsOfTime(DateTime from, DateTime to)
+    {
+        return Ok(await _dashboardService.GetStatisticsOfTime(from, to));
+    }
 }

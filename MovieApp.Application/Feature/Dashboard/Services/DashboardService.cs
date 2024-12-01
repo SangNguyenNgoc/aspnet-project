@@ -1,5 +1,8 @@
-﻿using MovieApp.Application.Exception;
+﻿using AutoMapper;
+using MovieApp.Application.Exception;
+using MovieApp.Application.Feature.Cinema.Dtos;
 using MovieApp.Application.Feature.Dashboard.Dtos;
+using MovieApp.Application.Feature.Movie.Dtos;
 using MovieApp.Domain.Bill.Repositories;
 using MovieApp.Domain.Cinema.Repositories;
 using MovieApp.Domain.Movie.Repositories;
@@ -14,14 +17,16 @@ public class DashboardService : IDashboardService
     private readonly IBillRepository _billRepository;  
     private readonly ITicketRepository _ticketRepository;
     private readonly IShowtimeRepository _showtimeRepository;
+    private readonly IMapper _mapper;
     
-    public DashboardService(ICinemaRepository cinemaRepository, IMovieRepository movieRepository, ITicketRepository ticketRepository, IShowtimeRepository showtimeRepository, IBillRepository billRepository)
+    public DashboardService(ICinemaRepository cinemaRepository, IMovieRepository movieRepository, ITicketRepository ticketRepository, IShowtimeRepository showtimeRepository, IBillRepository billRepository, IMapper mapper)
     {
         _cinemaRepository = cinemaRepository;
         _movieRepository = movieRepository;
         _ticketRepository = ticketRepository;
         _showtimeRepository = showtimeRepository;
         _billRepository = billRepository;
+        _mapper = mapper;
     }
     
     public async Task<List<MovieDashboard>?> StatisticMovie(int month, int year)
@@ -111,4 +116,28 @@ public class DashboardService : IDashboardService
 
         return chart;
     }
+
+    public async Task<StatisticsOfTime> GetStatisticsOfTime(DateTime from, DateTime to)
+    {
+        var bill = await _billRepository.GetBillByTime(from, to);
+        var numberOfTickets = 0;
+        var revenues = 0L;
+        var numberOfBill = 0;
+        if (bill != null)
+        {
+            numberOfTickets = bill.Sum(b => b.Tickets.Count);
+            revenues = bill.Sum(b => b.Total);
+            numberOfBill = bill.Count;
+        }
+        var bestMovie = await _movieRepository.GetBestMovie(from, to);
+        var bestCinema = await _cinemaRepository.GetBestCinema(from, to);
+        return new StatisticsOfTime{
+            numberOfTickets = numberOfTickets,
+            revenues = revenues,
+            numberOfBill = numberOfBill,
+            bestMovie = _mapper.Map<ManageMovie>(bestMovie),
+            bestCinema = _mapper.Map<CinemaDetail>(bestCinema)
+        };
+    }
+    
 }

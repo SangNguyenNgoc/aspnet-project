@@ -83,4 +83,18 @@ public class CinemaRepository : ICinemaRepository
         _context.SaveChanges();
         return Task.FromResult(cinema);
     }
+
+    public async Task<Domain.Cinema.Entities.Cinema?> GetBestCinema(DateTime from, DateTime to)
+    {
+        var fromDate = DateOnly.FromDateTime(from);
+        var toDate = DateOnly.FromDateTime(to);
+        return await _context.Cinemas
+            .Where(c => c.Halls.Any(h => h.Shows.Any(s => s.StartDate >= fromDate && s.StartDate <= toDate)))
+            .Include(c => c.Location)
+            .OrderByDescending(c => c.Halls.Sum(h => h.Shows
+                .Where(s => s.StartDate >= fromDate && s.StartDate <= toDate)
+                .Sum(s => s.Tickets.Sum(t => t.Seat.Type.Price))))
+            .FirstOrDefaultAsync();
+
+    }
 }

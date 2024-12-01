@@ -10,5 +10,6 @@ public interface IMovieRepository
     Task<string> Save(Domain.Movie.Entities.Movie movie);
     Task<List<Entities.Movie>> GetAll();
     Task<List<Entities.Movie>?> GetMovieByYear(int year);
+    Task<Entities.Movie?> GetBestMovie(DateTime from, DateTime to);  
     
 }
