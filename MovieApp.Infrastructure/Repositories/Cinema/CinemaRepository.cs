@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MovieApp.Domain.Cinema.Repositories;
 using MovieApp.Infrastructure.Context;
 
@@ -42,7 +43,7 @@ public class CinemaRepository : ICinemaRepository
             .ToListAsync();
     }
 
-    public async Task<string> Save(Domain.Cinema.Entities.Cinema cinema)
+    public async Task<string> Save(Domain.Cinema.Entities.Cinema? cinema)
     {
         var newCinema = await _context.Cinemas.AddAsync(cinema);
         await _context.SaveChangesAsync();
@@ -77,7 +78,7 @@ public class CinemaRepository : ICinemaRepository
             .ToListAsync();
     }
 
-    public Task<Domain.Cinema.Entities.Cinema> UpdateStatus(Domain.Cinema.Entities.Cinema cinema)
+    public Task<Domain.Cinema.Entities.Cinema?> UpdateStatus(Domain.Cinema.Entities.Cinema? cinema)
     {
         _context.Cinemas.Update(cinema);
         _context.SaveChanges();
@@ -96,5 +97,18 @@ public class CinemaRepository : ICinemaRepository
                 .Sum(s => s.Tickets.Sum(t => t.Seat.Type.Price))))
             .FirstOrDefaultAsync();
 
+    }
+
+    public async Task<Domain.Cinema.Entities.Cinema?> GetCinemaAdminById(string id)
+    {
+        return await _context.Cinemas
+            .Where(c => c!.Id == id)
+            .Include(c => c!.Halls)
+            .ThenInclude(h => h.Shows)
+            .ThenInclude(s => s.Movie)
+            .Include(c => c!.Halls)
+            .ThenInclude(h => h.Shows)
+            .ThenInclude(s => s.Format)
+            .FirstOrDefaultAsync();
     }
 }

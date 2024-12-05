@@ -20,7 +20,7 @@ public class MyDbContext : IdentityDbContext<User>
     public DbSet<BillStatus> BillStatus { get; set; }
     
     public DbSet<Location> Locations { get; set; }
-    public DbSet<Cinema> Cinemas { get; set; }
+    public DbSet<Cinema?> Cinemas { get; set; }
     public DbSet<CinemaStatus?> CinemaStatus { get; set; }
     public DbSet<Hall> Halls { get; set; }
     public DbSet<HallStatus> HallStatus { get; set; }

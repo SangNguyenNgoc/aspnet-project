@@ -97,4 +97,11 @@ public class CinemaController : ControllerBase
     {
         return Ok(await _hallService.UpdateSeatStatus(seatId));
     }
+    
+    [HttpGet("{cinemaId}/admin")]
+    // [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetCinemaAdminDetail(string cinemaId)
+    {
+        return Ok(await _cinemaService.GetCinemaAdminDetail(cinemaId));
+    }
 }

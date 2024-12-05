@@ -57,6 +57,15 @@ public class CinemaProfile : AutoMapper.Profile
         
         CreateMap<Hall, CinemaDetailManage.HallDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+
+        CreateMap<Domain.Cinema.Entities.Cinema, CinemaAdminDetail>()
+            .ForMember(dest => dest.Halls, opt => opt.MapFrom(src => src.Halls.ToList()))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location.Name));
+        
+        CreateMap<Hall, CinemaAdminDetail.HallAdmin>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.Showtimes, opt => opt.MapFrom(src => src.Shows.ToList()));
     }
     
 }

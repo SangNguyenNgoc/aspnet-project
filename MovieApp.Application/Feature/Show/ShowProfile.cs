@@ -21,5 +21,8 @@ public class ShowProfile : AutoMapper.Profile
         CreateMap<Domain.Cinema.Entities.Cinema, HallResponse.CinemaDto>();
         CreateMap<Seat, HallResponse.RowDto.SeatDto>()
             .ForMember(dest => dest.SeatType, opt => opt.MapFrom(src => src.Type));
+        CreateMap<Domain.Show.Entities.Show, ShowtimeDetailAdmin>()
+            .ForMember(dest => dest.Movie, opt => opt.MapFrom(src => src.Movie))
+            .ForMember(dest => dest.Format, opt => opt.MapFrom(src => src.Format));
     }
 }

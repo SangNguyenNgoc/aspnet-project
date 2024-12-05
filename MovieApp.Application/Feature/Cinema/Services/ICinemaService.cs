@@ -11,4 +11,5 @@ public interface ICinemaService
     Task<string> SaveCinema(CinemaCreated cinemaRequest);
     Task<CinemaDetailManage> GetCinemaDetail(string id);
     Task<CinemaDetailManage> UpdateCinemaStatus(string id);
+    Task<CinemaAdminDetail> GetCinemaAdminDetail(string id);
 };

@@ -119,4 +119,11 @@ public class CinemaService : ICinemaService
         await _cinemaRepository.UpdateStatus(cinema);
         return _mapper.Map<CinemaDetailManage>(cinema);
     }
+    
+    public async Task<CinemaAdminDetail> GetCinemaAdminDetail(string id)
+    {
+        var cinema = await _cinemaRepository.GetCinemaAdminById(id) ??
+                     throw new DataNotFoundException($"Cinema with id {id} not found");
+        return _mapper.Map<CinemaAdminDetail>(cinema);
+    }
 }

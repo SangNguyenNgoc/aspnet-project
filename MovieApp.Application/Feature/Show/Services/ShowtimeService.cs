@@ -24,10 +24,11 @@ public class ShowtimeService : IShowtimeService
     private readonly int _showtimeInterval = int.Parse(Environment.GetEnvironmentVariable("SHOWTIME_INTERVAL")!);
     private readonly IShowtimeRepository _showtimeRepository;
     private readonly ITicketRepository _ticketRepository;
+    private readonly ICinemaRepository _cinemaRepository;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public ShowtimeService(IShowtimeRepository showtimeRepository, IMovieRepository movieRepository, IMapper mapper,
-        IFormatRepository formatRepository, IHallRepository hallRepository, ITicketRepository ticketRepository)
+        IFormatRepository formatRepository, IHallRepository hallRepository, ITicketRepository ticketRepository, ICinemaRepository cinemaRepository)
     {
         _showtimeRepository = showtimeRepository;
         _movieRepository = movieRepository;
@@ -35,9 +36,10 @@ public class ShowtimeService : IShowtimeService
         _formatRepository = formatRepository;
         _hallRepository = hallRepository;
         _ticketRepository = ticketRepository;
+        _cinemaRepository = cinemaRepository;
     }
 
-    public async Task<List<Domain.Show.Entities.Show>> Create(CreateShowtimeRequest createShowtimeRequest)
+    public async Task<List<ShowtimeDetail>> Create(CreateShowtimeRequest createShowtimeRequest)
     {
         var createDate = DateOnly.FromDateTime(createShowtimeRequest.Date);
         await CheckMovieInput(createShowtimeRequest.Movies, createDate);
@@ -48,7 +50,9 @@ public class ShowtimeService : IShowtimeService
 
         var shows = await ScheduleShow(createShowtimeRequest.Movies, halls, createDate);
 
-        return await _showtimeRepository.Save(shows);
+        var createShows = await _showtimeRepository.Save(shows);
+        
+        return createShows.Select(s => _mapper.Map<ShowtimeDetail>(s)).ToList();
     }
 
     public async Task<ShowtimeDetail> GetSeatByShowId(string showId)
@@ -208,4 +212,55 @@ public class ShowtimeService : IShowtimeService
 
         return null; // Nếu không có movie nào phù hợp
     }
+    
+    public async Task<string> Delete(string id)
+    {
+        var showByIdAfter7day = await _showtimeRepository.GetShowByIdAfter7day(id) ?? 
+                                throw new DataNotFoundException($"Showtime with id {id} not found");
+        return await _showtimeRepository.Delete(id);
+    }
+    
+    public async Task<ShowtimeDetail> CreateHandWork(CreateShowtimeHandWork createShowtimeHandWork)
+    {
+        var createDate = DateOnly.FromDateTime(createShowtimeHandWork.Date);
+        var startTime = TimeOnly.FromDateTime(createShowtimeHandWork.Date);
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        if (createDate < today)
+            throw new BadRequestException("Invalid", ["Date must be greater than or equal to today."]);
+      
+        var movie = await _movieRepository.GetMovieById(createShowtimeHandWork.MovieId) ??
+                    throw new DataNotFoundException($"Movie with id {createShowtimeHandWork.MovieId} not found");
+        var hall = await _hallRepository.GetHallById(createShowtimeHandWork.HallId) ??
+                   throw new DataNotFoundException($"Hall with id {createShowtimeHandWork.HallId} not found");
+        var cinema = await _cinemaRepository.GetById(createShowtimeHandWork.CinemaId) ??
+                     throw new DataNotFoundException($"Cinema with id {createShowtimeHandWork.CinemaId} not found");
+        var format = movie.Formats.FirstOrDefault(f => f.Id == createShowtimeHandWork.FormatId) ?? 
+                     throw new BadRequestException("Invalid", ["Movie does not have the specified format."]);
+        if (hall.Cinema.Id != createShowtimeHandWork.CinemaId)
+            throw new BadRequestException("Invalid", ["Hall does not belong to this cinema."]);
+        if (!await CheckShowtimeExist(createShowtimeHandWork, movie, hall))
+        {
+            throw new BadRequestException("Invalid", ["Showtime is conflicted."]);
+        }
+        var show = new Domain.Show.Entities.Show
+        {
+            Movie = movie,
+            Hall = hall,
+            Format = format,
+            RunningTime = movie.RunningTime,
+            StartDate = createDate,
+            StartTime = startTime,
+            Status = 1
+        };
+        var shows = await _showtimeRepository.Save([show]);
+        return _mapper.Map<ShowtimeDetail>(show);
+    }
+
+    private async Task<bool> CheckShowtimeExist(CreateShowtimeHandWork createShowtimeHandWork, Domain.Movie.Entities.Movie movie, Hall hall)
+    {
+        var showExist = await _showtimeRepository.CheckShowtimeByTime(createShowtimeHandWork.Date, hall.Id);
+        return showExist.All(s => s.StartTime > TimeOnly.FromDateTime(createShowtimeHandWork.Date).AddMinutes(movie.RunningTime) ||
+                                  s.StartTime.AddMinutes(s.Movie.RunningTime) < TimeOnly.FromDateTime(createShowtimeHandWork.Date));
+    }
+    
 }

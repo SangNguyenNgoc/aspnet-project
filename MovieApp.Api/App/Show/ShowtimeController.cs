@@ -30,4 +30,20 @@ public class ShowtimeController : ControllerBase
         var result = await _showtimeService.GetSeatByShowId(showId);
         return Ok(result);
     }
+    
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        return Ok(await _showtimeService.Delete(id));
+    }
+    
+    [HttpPost("handwork")]
+    // [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateHandWork([FromBody] CreateShowtimeHandWork createShowtimeHandWork)
+    {
+        var result = await _showtimeService.CreateHandWork(createShowtimeHandWork);
+        return Ok(result);
+    }
+    
 }
