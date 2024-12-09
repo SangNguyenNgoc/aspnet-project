@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MovieApp.Domain.Bill.Repositories;
 using MovieApp.Infrastructure.Context;
 using MySqlConnector;
@@ -57,10 +56,15 @@ public class BillRepository : IBillRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<ICollection<Domain.Bill.Entities.Bill>> GetAllBillsAreExpired(DateTime dateTime)
+    public async Task<ICollection<Domain.Bill.Entities.Bill>> GetAllBillsAreExpired()
     {
         return await _context.Bills
-            .Where(b => b.ExpireAt < dateTime && b.Status.Id == 1)
+            .Where(b => b.Status.Id != 3)
+            .Include(b => b.Status)
+            .Include(b => b.User)
+            .Include(b => b.Tickets)
+            .ThenInclude(t => t.Seat)
+            .ThenInclude(s => s.Type)
             .ToListAsync();
     }
     

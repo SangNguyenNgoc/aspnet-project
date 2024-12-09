@@ -12,7 +12,7 @@ public interface IBillRepository
 
     Task<Entities.Bill?> GetBillDetailById(string billId);
 
-    Task<ICollection<Entities.Bill>> GetAllBillsAreExpired(DateTime dateTime);
+    Task<ICollection<Entities.Bill>> GetAllBillsAreExpired();
     
     Task UpdateExpiredBillsStatus(DateTime dateTime);
     

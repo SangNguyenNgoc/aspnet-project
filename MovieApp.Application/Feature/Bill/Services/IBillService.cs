@@ -7,6 +7,8 @@ namespace MovieApp.Application.Feature.Bill.Services;
 
 public interface IBillService
 {
+    Task<ICollection<BillDetail>> GetAllBills();
+    
     Task<string> CreateBill(BillCreate billCreate, string userId);
 
     void CheckSeatInHall(List<long> seatIds, Hall hall);

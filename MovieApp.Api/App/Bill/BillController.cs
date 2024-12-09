@@ -17,6 +17,14 @@ public class BillController : ControllerBase
         _billService = billService;
     }
 
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _billService.GetAllBills();
+        return Ok(result);
+    }
+
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> CreateBill([FromBody] BillCreate billCreate)

@@ -39,7 +39,22 @@ public class BillService : IBillService
         _mapper = mapper;
     }
 
+
+    public async Task<ICollection<BillDetail>> GetAllBills()
+    {
+        var bills = await _billRepository.GetAllBillsAreExpired();
+        var mapBillAndTicket =
+            await _ticketRepository.GetAllTicketByBillIdGroupByBillId(bills.Select(bill => bill.Id).ToList());
+        var billDetails = bills.Select(bill =>
+        {
+            mapBillAndTicket.TryGetValue(bill.Id, out var ticketDetail);
+            var billDetail = MapBillDetail(bill, ticketDetail!);
+            return billDetail;
+        }).ToList();
+        return billDetails;
+    }
     
+
     public async Task<string> CreateBill(BillCreate billCreate, string userId)
     {
         var user = await _userRepository.GetUserById(userId) ?? throw new DataNotFoundException("User not found");
