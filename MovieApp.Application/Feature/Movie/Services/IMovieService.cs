@@ -11,5 +11,5 @@ public interface IMovieService
     Task<List<StatusResponse>> GetAllStatus();
     Task<List<ManageMovie>> GetAllMovies();
     Task<MovieDetail> GetMovieById(string id);
-    Task<string> UpdateMovie(string id, MovieCreateRequest movieCreateRequest);
+    Task<string> UpdateMovie(string id, MovieUpdateRequest movieCreateRequest);
 }
