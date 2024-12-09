@@ -64,4 +64,10 @@ public class MovieController : ControllerBase
     {
         return Ok(await _movieService.GetMovieById(id));
     }
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateMovie(string id, [FromForm] MovieCreateRequest movieCreateRequest)
+    {
+        return Ok(await _movieService.UpdateMovie(id, movieCreateRequest));
+    }
 }

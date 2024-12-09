@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
+using Microsoft.SqlServer.Server;
 using MovieApp.Application.Exception;
 using MovieApp.Application.Feature.Cinema.Dtos;
 using MovieApp.Application.Feature.Movie.Dtos;
 using MovieApp.Application.Feature.Show.Dtos;
 using MovieApp.Domain.Cinema.Repositories;
+using MovieApp.Domain.Movie.Entities;
 using MovieApp.Domain.Movie.Repositories;
 using MovieApp.Infrastructure.S3;
+using Format = MovieApp.Domain.Movie.Entities.Format;
 
 namespace MovieApp.Application.Feature.Movie.Services;
 
@@ -114,18 +117,6 @@ public class MovieService : IMovieService
         var slug = AppUtil.GenerateSlug(newMovie.Name);
         var status = await _movieStatusRepository.FindById(movieCreateRequest.Status)
             ?? throw new DataNotFoundException($"Status {movieCreateRequest.Status} not found");
-
-        var formats = await _formatRepository.GetAll();
-        var genres = await _genreRepository.GetAll();
-        if (movieCreateRequest.Formats.Any(id => !formats.Exists(f => f.Id == id)))
-        {
-            throw new DataNotFoundException($"Format not found");
-        }
-        
-        if (movieCreateRequest.Genres.Any(id => !genres.Exists(g => g.Id == id)))
-        {
-            throw new DataNotFoundException($"Genre not found");
-        }
         
         newMovie.HorizontalPoster = await _s3Service.UploadFile(movieCreateRequest.HorizontalPoster, slug + "-horizontal", "posters");
         newMovie.Poster = await _s3Service.UploadFile(movieCreateRequest.Poster, slug, "posters");
@@ -133,8 +124,8 @@ public class MovieService : IMovieService
         
         newMovie.Status = status;
         
-        newMovie.Formats = formats.Where(f => movieCreateRequest.Formats.Contains(f.Id)).ToList();
-        newMovie.Genres = genres.Where(g => movieCreateRequest.Genres.Contains(g.Id)).ToList();
+        newMovie.Formats = await getFormats(movieCreateRequest.Formats);
+        newMovie.Genres = await getGenres(movieCreateRequest.Genres);
         newMovie.Description = AppUtil.SanitizeHtml(movieCreateRequest.Description);
         
         return await _movieRepository.Save(newMovie);
@@ -157,5 +148,46 @@ public class MovieService : IMovieService
         var movie = await _movieRepository.GetMovieById(id) ??
                     throw new DataNotFoundException($"Movie {id} not found");
         return _mapper.Map<MovieDetail>(movie);
+    }
+
+    public async Task<string> UpdateMovie(string id, MovieCreateRequest movieCreateRequest)
+    {
+        var movie = await _movieRepository.GetMovieById(id) ??
+                    throw new DataNotFoundException($"Movie {id} not found");
+        var slug = AppUtil.GenerateSlug(movieCreateRequest.Name);
+        var status = await _movieStatusRepository.FindById(movieCreateRequest.Status)
+                     ?? throw new DataNotFoundException($"Status {movieCreateRequest.Status} not found");
+        
+        movie.HorizontalPoster = await _s3Service.UploadFile(movieCreateRequest.HorizontalPoster, slug + "-horizontal", "posters");
+        movie.Poster = await _s3Service.UploadFile(movieCreateRequest.Poster, slug, "posters");
+        movie.Slug = slug;
+        
+        movie.Status = status;
+        
+        movie.Formats = await getFormats(movieCreateRequest.Formats);
+        movie.Genres = await getGenres(movieCreateRequest.Genres);
+        movie.Description = AppUtil.SanitizeHtml(movieCreateRequest.Description);
+        return await _movieRepository.Update(movie);
+    }
+
+    private async Task<List<Format>> getFormats(List<long> formatIds)
+    {
+        var formats = await _formatRepository.GetAll();
+        if (formatIds.Any(id => !formats.Exists(f => f.Id == id)))
+        {
+            throw new DataNotFoundException($"Format not found");
+        }
+        return formats.Where(f => formatIds.Contains(f.Id)).ToList();
+    }
+
+    private async Task<List<Genre>> getGenres(List<long> genreIds)
+    {
+        var genres = await _genreRepository.GetAll();
+        if (genreIds.Any(id => !genres.Exists(g => g.Id == id)))
+        {
+            throw new DataNotFoundException($"Genre not found");
+        }
+
+        return genres.Where(g => genreIds.Contains(g.Id)).ToList();
     }
 }

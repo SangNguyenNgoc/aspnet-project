@@ -95,4 +95,11 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
                 .Sum(s => s.Tickets.Sum(t => t.Seat.Type.Price)))
             .FirstOrDefaultAsync();
     }
+
+    public async Task<string> Update(Domain.Movie.Entities.Movie movie)
+    {
+        var newMovie = context.Movies.Update(movie);
+        await context.SaveChangesAsync();
+        return "success";
+    }
 }
