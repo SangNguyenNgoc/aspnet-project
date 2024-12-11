@@ -97,7 +97,7 @@ public class VnPayService
         return hash.ToString();
     }
     
-    public string GetMessage(string responseCode, string transactionStatus)
+    public static string GetMessage(string responseCode, string transactionStatus)
     {
         var responseCodeMessages = GetResponseCodeMessages();
     

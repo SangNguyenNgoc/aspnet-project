@@ -137,7 +137,7 @@ public class BillService : IBillService
         }
         else
         {
-            var message = _vnPayService.GetMessage(responseCode, transactionStatus);
+            var message = VnPayService.GetMessage(responseCode, transactionStatus);
             bill.FailureReason = message;
             bill.FailureAt = dateTime;
         }

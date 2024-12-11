@@ -3,27 +3,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Ganss.Xss;
 
-namespace MovieApp.Application.Feature.Movie.Services;
+namespace MovieApp.Application;
 
-public class AppUtil
+public static class AppUtil
 {
     public static string GenerateSlug(string phrase)
     {
-        // Chuyển đổi sang chữ thường
-        string slug = phrase.ToLowerInvariant();
-
-        // Chuẩn hóa các ký tự có dấu thành không dấu
+        var slug = phrase.ToLowerInvariant();
         slug = RemoveDiacritics(slug);
-
-        // Loại bỏ các ký tự đặc biệt
         slug = Regex.Replace(slug, @"[^a-z0-9\s-]", "");
-
-        // Thay khoảng trắng bằng dấu gạch ngang
         slug = Regex.Replace(slug, @"\s+", "-").Trim();
-
-        // Loại bỏ các dấu gạch ngang thừa
         slug = Regex.Replace(slug, @"-+", "-");
-
         return slug;
     }
 
@@ -44,7 +34,8 @@ public class AppUtil
         return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
     }
     
-    private static readonly List<string> AllowedTags = new() { "b", "i", "u", "p", "a", "div", "span", "h1", "h2", "h3", "h4", "strong", "ul", "li", "ol" };
+    private static readonly List<string> AllowedTags =
+        ["b", "i", "u", "p", "a", "div", "span", "h1", "h2", "h3", "h4", "strong", "ul", "li", "ol"];
     
     public static string SanitizeHtml(string inputHtml)
     {
