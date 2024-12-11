@@ -68,6 +68,7 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
     {
         return context.Movies
             .Include(m => m.Status)
+            .Include(m => m.Formats)
             .ToListAsync();
     }
 

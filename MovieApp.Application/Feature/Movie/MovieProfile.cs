@@ -45,7 +45,8 @@ public class MovieProfile : Profile
             .ForMember(dest => dest.Description, opt => opt.Ignore());
 
         CreateMap<Domain.Movie.Entities.Movie, ManageMovie>()
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.Formats, opt => opt.MapFrom(src => src.Formats));
 
     }
 }

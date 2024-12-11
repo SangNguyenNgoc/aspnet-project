@@ -53,7 +53,7 @@ public class MovieController : ControllerBase
     }
     
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    // [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAllMovies()
     {
         return Ok(await _movieService.GetAllMovies());

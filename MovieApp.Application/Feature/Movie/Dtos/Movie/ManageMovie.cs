@@ -21,4 +21,5 @@ public class ManageMovie
     public int NumberOfRatings { get; set; }
     
     public StatusResponse Status { get; set; } = null!;
+    public List<FormatResponse> Formats { get; set; } = null!;
 }
