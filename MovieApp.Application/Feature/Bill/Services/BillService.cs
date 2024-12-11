@@ -232,7 +232,6 @@ public class BillService : IBillService
     
     public Task<BillDetail> GetBillDetailByUser(string billId, string userId) => GetBillDetail(billId, userId);
     
-    
     public Task<BillDetail> GetBillDetailByAdmin(string billId) => GetBillDetail(billId);
 
 

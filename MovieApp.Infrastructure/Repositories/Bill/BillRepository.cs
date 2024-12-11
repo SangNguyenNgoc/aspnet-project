@@ -35,7 +35,7 @@ public class BillRepository : IBillRepository
     public async Task<ICollection<Domain.Bill.Entities.Bill>> GetByUserIdAsync(string userId)
     {
         return await _context.Bills
-            .Where(b => b.User.Id == userId)
+            .Where(b => b.User.Id == userId && b.Status.Id != 3)
             .Include(b => b.Status)
             .Include(b => b.User)
             .Include(b => b.Tickets)
@@ -47,7 +47,7 @@ public class BillRepository : IBillRepository
     public async Task<Domain.Bill.Entities.Bill?> GetBillDetailById(string billId)
     {
         return await _context.Bills
-            .Where(b => b.Id == billId)
+            .Where(b => b.Id == billId && b.Status.Id != 3)
             .Include(b => b.Status)
             .Include(b => b.User)
             .Include(b => b.Tickets)
