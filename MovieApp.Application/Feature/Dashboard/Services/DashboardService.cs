@@ -51,7 +51,8 @@ public class DashboardService : IDashboardService
                 numberOfTickets = movie.Shows.Where(s => s.StartDate.Month == month)
                     .Sum(s => s.Tickets.Count), 
                 revenues = movie.Shows.Where(s => s.StartDate.Month == month)
-                    .Sum(s => s.Tickets.Sum(t => t.Seat.Type.Price))
+                    .Sum(s => s.Tickets.Sum(t => t.Seat.Type.Price)),
+                poster = movie.Poster
             })
             .OrderByDescending(m => m.revenues)
             .ToList();

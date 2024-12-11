@@ -6,4 +6,5 @@ public class MovieDashboard
     public string name { get; set; }
     public int numberOfTickets { get; set; }
     public long revenues { get; set; }
+    public string poster { get; set; }
 }

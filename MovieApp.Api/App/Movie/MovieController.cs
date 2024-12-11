@@ -66,7 +66,8 @@ public class MovieController : ControllerBase
     }
     
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMovie(string id, [FromForm] MovieCreateRequest movieCreateRequest)
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateMovie(string id, [FromForm] MovieUpdateRequest movieCreateRequest)
     {
         return Ok(await _movieService.UpdateMovie(id, movieCreateRequest));
     }

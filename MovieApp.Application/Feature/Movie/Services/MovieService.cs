@@ -124,8 +124,8 @@ public class MovieService : IMovieService
         
         newMovie.Status = status;
         
-        newMovie.Formats = await getFormats(movieCreateRequest.Formats);
-        newMovie.Genres = await getGenres(movieCreateRequest.Genres);
+        newMovie.Formats = await GetFormats(movieCreateRequest.Formats);
+        newMovie.Genres = await GetGenres(movieCreateRequest.Genres);
         newMovie.Description = AppUtil.SanitizeHtml(movieCreateRequest.Description);
         
         return await _movieRepository.Save(newMovie);
@@ -150,27 +150,43 @@ public class MovieService : IMovieService
         return _mapper.Map<MovieDetail>(movie);
     }
 
-    public async Task<string> UpdateMovie(string id, MovieCreateRequest movieCreateRequest)
+    public async Task<string> UpdateMovie(string id, MovieUpdateRequest movieCreateRequest)
     {
         var movie = await _movieRepository.GetMovieById(id) ??
                     throw new DataNotFoundException($"Movie {id} not found");
         var slug = AppUtil.GenerateSlug(movieCreateRequest.Name);
         var status = await _movieStatusRepository.FindById(movieCreateRequest.Status)
                      ?? throw new DataNotFoundException($"Status {movieCreateRequest.Status} not found");
-        
-        movie.HorizontalPoster = await _s3Service.UploadFile(movieCreateRequest.HorizontalPoster, slug + "-horizontal", "posters");
-        movie.Poster = await _s3Service.UploadFile(movieCreateRequest.Poster, slug, "posters");
+
+        if (movieCreateRequest.HorizontalPoster != null)
+            movie.HorizontalPoster =
+                await _s3Service.UploadFile(movieCreateRequest.HorizontalPoster, slug + "-horizontal", "posters");
+        if (movieCreateRequest.Poster != null)
+            movie.Poster = await _s3Service.UploadFile(movieCreateRequest.Poster, slug, "posters");
         movie.Slug = slug;
         
         movie.Status = status;
         
-        movie.Formats = await getFormats(movieCreateRequest.Formats);
-        movie.Genres = await getGenres(movieCreateRequest.Genres);
+        movie.Formats = await GetFormats(movieCreateRequest.Formats);
+        movie.Genres = await GetGenres(movieCreateRequest.Genres);
         movie.Description = AppUtil.SanitizeHtml(movieCreateRequest.Description);
+        
+        movie.Name = movieCreateRequest.Name;
+        movie.SubName = movieCreateRequest.SubName;
+        movie.AgeRestriction = movieCreateRequest.AgeRestriction;
+        movie.Director = movieCreateRequest.Director;
+        movie.ReleaseDate = movieCreateRequest.ReleaseDate;
+        movie.EndDate = movieCreateRequest.EndDate;
+        movie.RunningTime = movieCreateRequest.RunningTime;
+        movie.Producer = movieCreateRequest.Producer;
+        movie.Trailer = movieCreateRequest.Trailer;
+        movie.Language = movieCreateRequest.Language;
+        movie.Performers = movieCreateRequest.Performers;
+        
         return await _movieRepository.Update(movie);
     }
 
-    private async Task<List<Format>> getFormats(List<long> formatIds)
+    private async Task<List<Format>> GetFormats(List<long> formatIds)
     {
         var formats = await _formatRepository.GetAll();
         if (formatIds.Any(id => !formats.Exists(f => f.Id == id)))
@@ -180,7 +196,7 @@ public class MovieService : IMovieService
         return formats.Where(f => formatIds.Contains(f.Id)).ToList();
     }
 
-    private async Task<List<Genre>> getGenres(List<long> genreIds)
+    private async Task<List<Genre>> GetGenres(List<long> genreIds)
     {
         var genres = await _genreRepository.GetAll();
         if (genreIds.Any(id => !genres.Exists(g => g.Id == id)))
