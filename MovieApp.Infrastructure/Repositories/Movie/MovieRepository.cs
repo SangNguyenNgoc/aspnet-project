@@ -15,7 +15,7 @@ public class MovieRepository(MyDbContext context) : IMovieRepository
             .SingleOrDefaultAsync(m => m.Id == id);
     }
 
-    public async Task<List<Domain.Movie.Entities.Movie>> GetAllMoviesByDate(DateOnly date)
+    public async Task<List<Domain.Movie.Entities.Movie>>? GetAllMoviesByDate(DateOnly date)
     {
         // Truy vấn tất cả các bộ phim có ngày phát hành trước 'date' và ngày kết thúc sau 'date'
         return await context.Movies

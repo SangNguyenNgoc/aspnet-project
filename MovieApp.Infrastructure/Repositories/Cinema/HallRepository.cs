@@ -14,7 +14,7 @@ public class HallRepository : IHallRepository
         _context = context;
     }
 
-    public async Task<List<Hall>> GetHallsByDate(DateOnly date, string cinemaId)
+    public async Task<List<Hall>?> GetHallsByDate(DateOnly date, string cinemaId)
     {
         var halls = await _context.Halls
             .Where(h => h.Cinema.Id == cinemaId).Include(hall => hall.Shows)

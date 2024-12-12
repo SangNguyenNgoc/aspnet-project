@@ -20,8 +20,8 @@ public class ShowtimeController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateShowtimeRequest createShowtimeRequest)
     {
-        await _showtimeService.Create(createShowtimeRequest);
-        return Ok("success");
+        var result = await _showtimeService.Create(createShowtimeRequest);
+        return Ok(result);
     }
 
     [HttpGet("{showId}/seats")]

@@ -46,7 +46,8 @@ public class ShowtimeService : IShowtimeService
 
         if (createShowtimeRequest.CinemaId == null)
             throw new BadRequestException("Invalid", [.. Messages]);
-        var halls = await _hallRepository.GetHallsByDate(createDate, createShowtimeRequest.CinemaId);
+        var halls = await _hallRepository.GetHallsByDate(createDate, createShowtimeRequest.CinemaId) ??
+                    throw new BadRequestException("Invalid",["There are halls that have showtime on this date."]);
 
         var shows = await ScheduleShow(createShowtimeRequest.Movies, halls, createDate);
 
